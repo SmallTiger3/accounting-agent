@@ -7,7 +7,6 @@ const api = axios.create({
   timeout: 60000,
 })
 
-// ÇëÇóÀ¹½ØÆ÷
 api.interceptors.request.use((config) => {
   const authStore = useAuthStore()
   if (authStore.token) {
@@ -16,7 +15,6 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// ÏìÓ¦À¹½ØÆ÷
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
@@ -31,7 +29,6 @@ api.interceptors.response.use(
 
 export default api
 
-// Auth API
 export const authApi = {
   login: (username: string, password: string) =>
     api.post('/auth/login', { username, password }),
@@ -39,7 +36,6 @@ export const authApi = {
     api.post('/auth/register', { username, email, password }),
 }
 
-// Accounts API
 export const accountsApi = {
   list: () => api.get('/accounts/'),
   create: (data: any) => api.post('/accounts/', data),
@@ -48,26 +44,22 @@ export const accountsApi = {
   delete: (id: number) => api.delete(`/accounts/${id}`),
 }
 
-// Transactions API
 export const transactionsApi = {
   list: (params?: any) => api.get('/transactions/', { params }),
   create: (data: any) => api.post('/transactions/', data),
   delete: (id: number) => api.delete(`/transactions/${id}`),
 }
 
-// Categories API
 export const categoriesApi = {
   list: (type?: string) => api.get('/categories/', { params: { category_type: type } }),
 }
 
-// Budgets API
 export const budgetsApi = {
   list: (year?: number, month?: number) => api.get('/budgets/', { params: { year, month } }),
   create: (data: any) => api.post('/budgets/', data),
   delete: (id: number) => api.delete(`/budgets/${id}`),
 }
 
-// Chat API
 export const chatApi = {
   getSessions: () => api.get('/chat/sessions'),
   getMessages: (sessionId: number) => api.get(`/chat/sessions/${sessionId}/messages`),

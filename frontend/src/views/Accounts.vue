@@ -1,9 +1,9 @@
 <template>
   <div class="accounts-page">
     <div class="page-header">
-      <h2>’Àªßπ‹¿Ì</h2>
+      <h2>Ë¥¶Êà∑ÁÆ°ÁêÜ</h2>
       <el-button type="primary" @click="showAddDialog = true">
-        <el-icon><Plus /></el-icon> ÃÌº”’Àªß
+        <el-icon><Plus /></el-icon> Ê∑ªÂä†Ë¥¶Êà∑
       </el-button>
     </div>
     
@@ -18,8 +18,8 @@
               <el-icon class="more-btn"><More /></el-icon>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="edit">±‡º≠</el-dropdown-item>
-                  <el-dropdown-item command="delete" divided>…æ≥˝</el-dropdown-item>
+                  <el-dropdown-item command="edit">ÁºñËæë</el-dropdown-item>
+                  <el-dropdown-item command="delete" divided>Âà†Èô§</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -27,37 +27,36 @@
           <div class="account-name">{{ account.name }}</div>
           <div class="account-type">{{ getAccountTypeName(account.account_type) }}</div>
           <div class="account-balance" :class="account.balance >= 0 ? 'positive' : 'negative'">
-            £§{{ account.balance.toFixed(2) }}
+            ¬•{{ account.balance.toFixed(2) }}
           </div>
           <div class="account-desc" v-if="account.description">{{ account.description }}</div>
         </el-card>
       </el-col>
     </el-row>
     
-    <!-- ÃÌº”’Àªß∂‘ª∞øÚ -->
-    <el-dialog v-model="showAddDialog" :title="editingAccount ? '±‡º≠’Àªß' : 'ÃÌº”’Àªß'" width="400px">
+    <el-dialog v-model="showAddDialog" :title="editingAccount ? 'ÁºñËæëË¥¶Êà∑' : 'Ê∑ªÂä†Ë¥¶Êà∑'" width="400px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
-        <el-form-item label="√˚≥∆" prop="name">
-          <el-input v-model="form.name" placeholder="’Àªß√˚≥∆" />
+        <el-form-item label="ÂêçÁß∞" prop="name">
+          <el-input v-model="form.name" placeholder="Ë¥¶Êà∑ÂêçÁß∞" />
         </el-form-item>
-        <el-form-item label="¿‡–Õ" prop="account_type">
+        <el-form-item label="Á±ªÂûã" prop="account_type">
           <el-select v-model="form.account_type" style="width: 100%">
-            <el-option label="œ÷Ω" value="cash" />
-            <el-option label="“¯––ø®" value="bank" />
-            <el-option label="–≈”√ø®" value="credit" />
-            <el-option label="Õ∂◊ ’Àªß" value="investment" />
+            <el-option label="Áé∞Èáë" value="cash" />
+            <el-option label="Èì∂Ë°åÂç°" value="bank" />
+            <el-option label="‰ø°Áî®Âç°" value="credit" />
+            <el-option label="ÊäïËµÑË¥¶Êà∑" value="investment" />
           </el-select>
         </el-form-item>
-        <el-form-item label="≥ı º”‡∂Ó" prop="balance" v-if="!editingAccount">
+        <el-form-item label="ÂàùÂßã‰ΩôÈ¢ù" prop="balance" v-if="!editingAccount">
           <el-input-number v-model="form.balance" :precision="2" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="√Ë ˆ">
+        <el-form-item label="ÊèèËø∞">
           <el-input v-model="form.description" type="textarea" :rows="2" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showAddDialog = false">»°œ˚</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">»∑∂®</el-button>
+        <el-button @click="showAddDialog = false">ÂèñÊ∂à</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitting">Á°ÆÂÆö</el-button>
       </template>
     </el-dialog>
   </div>
@@ -82,8 +81,8 @@ const form = reactive({
 })
 
 const rules = {
-  name: [{ required: true, message: '«Î ‰»Î’Àªß√˚≥∆' }],
-  account_type: [{ required: true, message: '«Î—°‘Ò’Àªß¿‡–Õ' }],
+  name: [{ required: true, message: 'ËØ∑ËæìÂÖ•Ë¥¶Êà∑ÂêçÁß∞' }],
+  account_type: [{ required: true, message: 'ËØ∑ÈÄâÊã©Ë¥¶Êà∑Á±ªÂûã' }],
 }
 
 onMounted(() => {
@@ -94,7 +93,7 @@ async function loadAccounts() {
   try {
     accounts.value = await accountsApi.list()
   } catch (error) {
-    ElMessage.error('º”‘ÿ ß∞‹')
+    ElMessage.error('Âä†ËΩΩÂ§±Ë¥•')
   }
 }
 
@@ -110,10 +109,10 @@ function getAccountColor(type: string) {
 
 function getAccountTypeName(type: string) {
   const names: Record<string, string> = {
-    cash: 'œ÷Ω',
-    bank: '“¯––ø®',
-    credit: '–≈”√ø®',
-    investment: 'Õ∂◊ ’Àªß',
+    cash: 'Áé∞Èáë',
+    bank: 'Èì∂Ë°åÂç°',
+    credit: '‰ø°Áî®Âç°',
+    investment: 'ÊäïËµÑË¥¶Êà∑',
   }
   return names[type] || type
 }
@@ -125,10 +124,10 @@ async function handleSubmit() {
     
     if (editingAccount.value) {
       await accountsApi.update(editingAccount.value.id, form)
-      ElMessage.success('∏¸–¬≥…π¶')
+      ElMessage.success('Êõ¥Êñ∞ÊàêÂäü')
     } else {
       await accountsApi.create(form)
-      ElMessage.success('ÃÌº”≥…π¶')
+      ElMessage.success('Ê∑ªÂä†ÊàêÂäü')
     }
     
     showAddDialog.value = false
@@ -155,9 +154,9 @@ function handleCommand(command: string, account: any) {
     form.description = account.description || ''
     showAddDialog.value = true
   } else if (command === 'delete') {
-    ElMessageBox.confirm('»∑∂®“™…æ≥˝’‚∏ˆ’Àªß¬£ø', '»∑»œ').then(async () => {
+    ElMessageBox.confirm('Á°ÆÂÆöË¶ÅÂà†Èô§Ëøô‰∏™Ë¥¶Êà∑ÂêóÔºü', 'Á°ÆËÆ§').then(async () => {
       await accountsApi.delete(account.id)
-      ElMessage.success('“—…æ≥˝')
+      ElMessage.success('Â∑≤Âà†Èô§')
       loadAccounts()
     }).catch(() => {})
   }

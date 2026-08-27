@@ -8,21 +8,21 @@ from ...db.session import get_db
 from ...models.budget import Budget
 from ...models.transaction import Transaction
 from ...models.category import Category
-from ...schemas.budget import BudgetCreate, BudgetResponse
+from ...schemas.budget import BudgetCreate
 from ...api.deps import get_current_user
 from ...models.user import User
 
-router = APIRouter(prefix="/budgets", tags=["预算"])
+router = APIRouter(prefix="/budgets", tags=["棰勭畻"])
 
 
-@router.get("/", response_model=List[BudgetResponse])
+@router.get("/", response_model=List[dict])
 async def list_budgets(
     year: int = None,
     month: int = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """获取预算列表"""
+    """鑾峰彇棰勭畻鍒楄〃"""
     today = date.today()
     year = year or today.year
     month = month or today.month
@@ -36,12 +36,10 @@ async def list_budgets(
     )
     budgets = result.scalars().all()
     
-    # 计算每个预算的使用情况
     budget_list = []
     start_date = date(year, month, 1)
     
     for budget in budgets:
-        # 计算已花费
         query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
             Transaction.user_id == current_user.id,
             Transaction.transaction_type == "expense",
@@ -54,7 +52,6 @@ async def list_budgets(
         spent = float((await db.execute(query)).scalar_one())
         budget_amount = float(budget.amount)
         
-        # 获取分类名称
         category_name = None
         if budget.category_id:
             cat_result = await db.execute(select(Category.name).where(Category.id == budget.category_id))
@@ -68,7 +65,7 @@ async def list_budgets(
             "year": budget.year,
             "month": budget.month,
             "alert_threshold": float(budget.alert_threshold),
-            "created_at": budget.created_at,
+            "created_at": budget.created_at.isoformat(),
             "spent": spent,
             "remaining": budget_amount - spent,
             "usage_percent": round(spent / budget_amount * 100, 1) if budget_amount > 0 else 0,
@@ -84,7 +81,7 @@ async def create_budget(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """创建预算"""
+    """鍒涘缓棰勭畻"""
     budget = Budget(user_id=current_user.id, **budget_data.model_dump())
     db.add(budget)
     await db.flush()
@@ -105,7 +102,7 @@ async def delete_budget(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """删除预算"""
+    """鍒犻櫎棰勭畻"""
     result = await db.execute(
         select(Budget).where(Budget.id == budget_id, Budget.user_id == current_user.id)
     )

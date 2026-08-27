@@ -1,4 +1,14 @@
-# 记账Agent
+const fs = require('fs');
+const path = require('path');
+function w(rel, content) {
+  const p = path.join('D:/gpl/agent', rel);
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, content, 'utf8');
+  console.log('OK: ' + rel);
+}
+
+// README.md
+w('README.md', `# 记账Agent
 
 智能AI记账助手 - 基于LangChain的个人财务管理应用
 
@@ -26,21 +36,21 @@
 ### 方式一：Docker部署（推荐）
 
 1. 克隆项目
-```bash
+\`\`\`bash
 git clone https://github.com/SmallTiger3/accounting-agent.git
 cd accounting-agent
-```
+\`\`\`
 
 2. 配置环境变量
-```bash
+\`\`\`bash
 cp .env.example .env
 # 编辑 .env 文件，填入你的配置
-```
+\`\`\`
 
 3. 启动服务
-```bash
+\`\`\`bash
 docker-compose up -d
-```
+\`\`\`
 
 4. 访问应用
 - 前端：http://localhost
@@ -50,14 +60,14 @@ docker-compose up -d
 
 #### 后端
 
-```bash
+\`\`\`bash
 cd backend
 
 # 创建虚拟环境
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # 或
-venv\Scripts\activate  # Windows
+venv\\Scripts\\activate  # Windows
 
 # 安装依赖
 pip install -r requirements.txt
@@ -68,11 +78,11 @@ cp .env.example .env
 
 # 启动服务
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+\`\`\`
 
 #### 前端
 
-```bash
+\`\`\`bash
 cd frontend
 
 # 安装依赖
@@ -80,11 +90,11 @@ npm install
 
 # 启动开发服务器
 npm run dev
-```
+\`\`\`
 
 ## 📁 项目结构
 
-```
+\`\`\`
 accounting-agent/
 ├── backend/                    # 后端服务
 │   ├── app/
@@ -113,7 +123,7 @@ accounting-agent/
 │   └── Dockerfile
 ├── docker-compose.yml
 └── README.md
-```
+\`\`\`
 
 ## 🔧 配置说明
 
@@ -121,13 +131,13 @@ accounting-agent/
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `DATABASE_URL` | PostgreSQL连接字符串 | - |
-| `SECRET_KEY` | JWT密钥 | - |
-| `LLM_PROVIDER` | LLM提供商 | `deepseek` |
-| `DEEPSEEK_API_KEY` | DeepSeek API密钥 | - |
-| `DEEPSEEK_BASE_URL` | DeepSeek API地址 | `https://api.deepseek.com` |
-| `LLM_MODEL` | 模型名称 | `deepseek-chat` |
-| `LLM_TEMPERATURE` | 生成温度 | `0.7` |
+| \`DATABASE_URL\` | PostgreSQL连接字符串 | - |
+| \`SECRET_KEY\` | JWT密钥 | - |
+| \`LLM_PROVIDER\` | LLM提供商 | \`deepseek\` |
+| \`DEEPSEEK_API_KEY\` | DeepSeek API密钥 | - |
+| \`DEEPSEEK_BASE_URL\` | DeepSeek API地址 | \`https://api.deepseek.com\` |
+| \`LLM_MODEL\` | 模型名称 | \`deepseek-chat\` |
+| \`LLM_TEMPERATURE\` | 生成温度 | \`0.7\` |
 
 ### 支持的LLM
 
@@ -148,3 +158,6 @@ accounting-agent/
 ## 📄 许可证
 
 MIT License
+`);
+
+console.log('Done: README.md');

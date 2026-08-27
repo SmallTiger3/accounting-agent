@@ -1,7 +1,6 @@
 import json
 from datetime import datetime, date
 from decimal import Decimal
-from typing import Optional
 from langchain_core.tools import tool
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,29 +21,26 @@ async def add_transaction(
     category_name: str = "other",
     transaction_date: str = None,
 ) -> str:
-    """¼ÇÂ¼Ò»±ÊÊÕÈë»òÖ§³ö½»Ò×¡£
+    """è®°å½•ä¸€ç¬”æ”¶å…¥æˆ–æ”¯å‡ºäº¤æ˜“ã€‚
     
     Args:
-        amount: ½ğ¶î£¨ÕıÊı£©
-        transaction_type: ½»Ò×ÀàĞÍ£¬income(ÊÕÈë) »ò expense(Ö§³ö)
-        description: ½»Ò×ÃèÊö
-        account_name: ÕË»§Ãû³Æ£¬Ä¬ÈÏÎª"default"
-        category_name: ·ÖÀàÃû³Æ£¬Ä¬ÈÏÎª"other"
-        transaction_date: ½»Ò×ÈÕÆÚ£¬¸ñÊ½YYYY-MM-DD£¬Ä¬ÈÏÎª½ñÌì
+        amount: é‡‘é¢ï¼ˆæ­£æ•°ï¼‰
+        transaction_type: äº¤æ˜“ç±»å‹ï¼Œincome(æ”¶å…¥) æˆ– expense(æ”¯å‡º)
+        description: äº¤æ˜“æè¿°
+        account_name: è´¦æˆ·åç§°ï¼Œé»˜è®¤ä¸º"default"
+        category_name: åˆ†ç±»åç§°ï¼Œé»˜è®¤ä¸º"other"
+        transaction_date: äº¤æ˜“æ—¥æœŸï¼Œæ ¼å¼YYYY-MM-DDï¼Œé»˜è®¤ä¸ºä»Šå¤©
     """
     try:
-        # ²éÕÒ»òÊ¹ÓÃÄ¬ÈÏÕË»§
         result = await db.execute(
             select(Account).where(Account.user_id == user_id, Account.name.ilike(f"%{account_name}%"))
         )
         account = result.scalar_one_or_none()
         if not account:
-            # ´´½¨Ä¬ÈÏÕË»§
-            account = Account(user_id=user_id, name="Ä¬ÈÏÕË»§", account_type="cash", balance=0)
+            account = Account(user_id=user_id, name="é»˜è®¤è´¦æˆ·", account_type="cash", balance=0)
             db.add(account)
             await db.flush()
         
-        # ²éÕÒ·ÖÀà
         result = await db.execute(
             select(Category).where(
                 (Category.user_id == user_id) | (Category.is_system == True),
@@ -54,8 +50,7 @@ async def add_transaction(
         )
         category = result.scalar_one_or_none()
         if not category:
-            # Ê¹ÓÃÄ¬ÈÏ·ÖÀà
-            category_name_default = "ÆäËûÊÕÈë" if transaction_type == "income" else "ÆäËûÖ§³ö"
+            category_name_default = "å…¶ä»–æ”¶å…¥" if transaction_type == "income" else "å…¶ä»–æ”¯å‡º"
             result = await db.execute(
                 select(Category).where(Category.name == category_name_default, Category.is_system == True)
             )
@@ -65,13 +60,11 @@ async def add_transaction(
                 db.add(category)
                 await db.flush()
         
-        # ½âÎöÈÕÆÚ
         if transaction_date:
             txn_date = datetime.strptime(transaction_date, "%Y-%m-%d").date()
         else:
             txn_date = date.today()
         
-        # ´´½¨½»Ò×¼ÇÂ¼
         amount_decimal = Decimal(str(amount))
         transaction = Transaction(
             user_id=user_id,
@@ -84,7 +77,6 @@ async def add_transaction(
         )
         db.add(transaction)
         
-        # ¸üĞÂÕË»§Óà¶î
         if transaction_type == "income":
             account.balance += amount_decimal
         else:
@@ -92,10 +84,10 @@ async def add_transaction(
         
         await db.flush()
         
-        type_str = "ÊÕÈë" if transaction_type == "income" else "Ö§³ö"
+        type_str = "æ”¶å…¥" if transaction_type == "income" else "æ”¯å‡º"
         return json.dumps({
             "success": True,
-            "message": f"ÒÑ¼ÇÂ¼{type_str}£º{description}£¬½ğ¶î £¤{amount:.2f}",
+            "message": f"å·²è®°å½•{type_str}ï¼š{description}ï¼Œé‡‘é¢ Â¥{amount:.2f}",
             "transaction_id": transaction.id,
             "account_balance": float(account.balance),
         }, ensure_ascii=False)
@@ -114,14 +106,14 @@ async def query_transactions(
     category_name: str = None,
     limit: int = 20,
 ) -> str:
-    """²éÑ¯½»Ò×¼ÇÂ¼¡£
+    """æŸ¥è¯¢äº¤æ˜“è®°å½•ã€‚
     
     Args:
-        start_date: ¿ªÊ¼ÈÕÆÚ£¬¸ñÊ½YYYY-MM-DD
-        end_date: ½áÊøÈÕÆÚ£¬¸ñÊ½YYYY-MM-DD
-        transaction_type: ½»Ò×ÀàĞÍ¹ıÂË£¬income»òexpense
-        category_name: ·ÖÀàÃû³Æ¹ıÂË
-        limit: ·µ»ØÊıÁ¿ÏŞÖÆ
+        start_date: å¼€å§‹æ—¥æœŸï¼Œæ ¼å¼YYYY-MM-DD
+        end_date: ç»“æŸæ—¥æœŸï¼Œæ ¼å¼YYYY-MM-DD
+        transaction_type: äº¤æ˜“ç±»å‹è¿‡æ»¤ï¼Œincomeæˆ–expense
+        category_name: åˆ†ç±»åç§°è¿‡æ»¤
+        limit: è¿”å›æ•°é‡é™åˆ¶
     """
     try:
         query = select(Transaction, Account.name, Category.name).join(

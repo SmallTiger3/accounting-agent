@@ -4,7 +4,7 @@ from ..core.config import settings
 
 
 def create_llm() -> BaseChatModel:
-    """根据配置创建LLM实例"""
+    """鏍规嵁閰嶇疆鍒涘缓LLM瀹炰緥"""
     provider = settings.LLM_PROVIDER.lower()
     
     if provider == "deepseek":
@@ -25,7 +25,6 @@ def create_llm() -> BaseChatModel:
             max_tokens=4096,
         )
     elif provider == "mimo":
-        # MiMo如果兼容OpenAI格式，可以直接用ChatOpenAI
         from langchain_openai import ChatOpenAI
         return ChatOpenAI(
             model=settings.LLM_MODEL or "mimo-chat",

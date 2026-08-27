@@ -1,8 +1,7 @@
 <template>
   <div class="dashboard">
-    <h2>Êı¾İ¿´°å</h2>
+    <h2>æ•°æ®çœ‹æ¿</h2>
     
-    <!-- Í³¼Æ¿¨Æ¬ -->
     <el-row :gutter="20" class="stat-cards">
       <el-col :span="6">
         <el-card shadow="hover">
@@ -11,8 +10,8 @@
               <el-icon size="24"><TrendCharts /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-label">±¾ÔÂÊÕÈë</div>
-              <div class="stat-value income">£¤{{ stats.totalIncome.toFixed(2) }}</div>
+              <div class="stat-label">æœ¬æœˆæ”¶å…¥</div>
+              <div class="stat-value income">Â¥{{ stats.totalIncome.toFixed(2) }}</div>
             </div>
           </div>
         </el-card>
@@ -24,8 +23,8 @@
               <el-icon size="24"><TrendCharts /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-label">±¾ÔÂÖ§³ö</div>
-              <div class="stat-value expense">£¤{{ stats.totalExpense.toFixed(2) }}</div>
+              <div class="stat-label">æœ¬æœˆæ”¯å‡º</div>
+              <div class="stat-value expense">Â¥{{ stats.totalExpense.toFixed(2) }}</div>
             </div>
           </div>
         </el-card>
@@ -37,9 +36,9 @@
               <el-icon size="24"><Wallet /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-label">±¾ÔÂ½áÓà</div>
+              <div class="stat-label">æœ¬æœˆç»“ä½™</div>
               <div class="stat-value" :class="stats.netIncome >= 0 ? 'income' : 'expense'">
-                £¤{{ stats.netIncome.toFixed(2) }}
+                Â¥{{ stats.netIncome.toFixed(2) }}
               </div>
             </div>
           </div>
@@ -52,7 +51,7 @@
               <el-icon size="24"><List /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-label">½»Ò×±ÊÊı</div>
+              <div class="stat-label">äº¤æ˜“ç¬”æ•°</div>
               <div class="stat-value">{{ stats.transactionCount }}</div>
             </div>
           </div>
@@ -60,17 +59,16 @@
       </el-col>
     </el-row>
     
-    <!-- Í¼±íÇøÓò -->
     <el-row :gutter="20" class="charts">
       <el-col :span="12">
         <el-card>
-          <template #header>Ö§³ö·ÖÀàÕ¼±È</template>
+          <template #header>æ”¯å‡ºåˆ†ç±»å æ¯”</template>
           <div ref="pieChart" style="height: 300px"></div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card>
-          <template #header>×î½ü7ÌìÊÕÖ§Ç÷ÊÆ</template>
+          <template #header>æœ€è¿‘7å¤©æ”¶æ”¯è¶‹åŠ¿</template>
           <div ref="lineChart" style="height: 300px"></div>
         </el-card>
       </el-col>
@@ -123,7 +121,6 @@ async function loadStats() {
 }
 
 function initCharts() {
-  // ±ıÍ¼ - Ö§³ö·ÖÀàÕ¼±È
   if (pieChart.value) {
     const chart = echarts.init(pieChart.value)
     chart.setOption({
@@ -132,28 +129,27 @@ function initCharts() {
         type: 'pie',
         radius: '60%',
         data: [
-          { value: 1048, name: '²ÍÒû' },
-          { value: 735, name: '½»Í¨' },
-          { value: 580, name: '¹ºÎï' },
-          { value: 484, name: 'ÓéÀÖ' },
-          { value: 300, name: 'ÆäËû' },
+          { value: 1048, name: 'é¤é¥®' },
+          { value: 735, name: 'äº¤é€š' },
+          { value: 580, name: 'è´­ç‰©' },
+          { value: 484, name: 'å¨±ä¹' },
+          { value: 300, name: 'å…¶ä»–' },
         ],
       }],
     })
   }
   
-  // ÕÛÏßÍ¼ - ×î½ü7ÌìÇ÷ÊÆ
   if (lineChart.value) {
     const chart = echarts.init(lineChart.value)
-    const days = ['ÖÜÒ»', 'ÖÜ¶ş', 'ÖÜÈı', 'ÖÜËÄ', 'ÖÜÎå', 'ÖÜÁù', 'ÖÜÈÕ']
+    const days = ['å‘¨ä¸€', 'å‘¨äºŒ', 'å‘¨ä¸‰', 'å‘¨å››', 'å‘¨äº”', 'å‘¨å…­', 'å‘¨æ—¥']
     chart.setOption({
       tooltip: { trigger: 'axis' },
-      legend: { data: ['ÊÕÈë', 'Ö§³ö'] },
+      legend: { data: ['æ”¶å…¥', 'æ”¯å‡º'] },
       xAxis: { type: 'category', data: days },
       yAxis: { type: 'value' },
       series: [
-        { name: 'ÊÕÈë', type: 'line', data: [0, 0, 5000, 0, 0, 0, 0] },
-        { name: 'Ö§³ö', type: 'line', data: [120, 85, 200, 150, 300, 180, 95] },
+        { name: 'æ”¶å…¥', type: 'line', data: [0, 0, 5000, 0, 0, 0, 0] },
+        { name: 'æ”¯å‡º', type: 'line', data: [120, 85, 200, 150, 300, 180, 95] },
       ],
     })
   }

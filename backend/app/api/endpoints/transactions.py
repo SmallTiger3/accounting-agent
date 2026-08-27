@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from typing import List, Optional
+from typing import Optional
 from datetime import date
 import json
 
@@ -9,11 +9,11 @@ from ...db.session import get_db
 from ...models.transaction import Transaction
 from ...models.account import Account
 from ...models.category import Category
-from ...schemas.transaction import TransactionCreate, TransactionUpdate, TransactionResponse
+from ...schemas.transaction import TransactionCreate
 from ...api.deps import get_current_user
 from ...models.user import User
 
-router = APIRouter(prefix="/transactions", tags=["交易"])
+router = APIRouter(prefix="/transactions", tags=["浜ゆ槗"])
 
 
 @router.get("/", response_model=dict)
@@ -29,14 +29,13 @@ async def list_transactions(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """获取交易列表"""
+    """鑾峰彇浜ゆ槗鍒楄〃"""
     query = select(
         Transaction, Account.name.label("account_name"), Category.name.label("category_name")
     ).join(Account, Transaction.account_id == Account.id
     ).join(Category, Transaction.category_id == Category.id
     ).where(Transaction.user_id == current_user.id)
     
-    # 过滤条件
     if account_id:
         query = query.where(Transaction.account_id == account_id)
     if category_id:
@@ -50,11 +49,9 @@ async def list_transactions(
     if keyword:
         query = query.where(Transaction.description.ilike(f"%{keyword}%"))
     
-    # 计算总数
     count_query = select(func.count()).select_from(query.subquery())
     total = (await db.execute(count_query)).scalar_one()
     
-    # 分页
     query = query.order_by(Transaction.transaction_date.desc())
     query = query.offset((page - 1) * page_size).limit(page_size)
     
@@ -92,8 +89,7 @@ async def create_transaction(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """创建交易"""
-    # 验证账户属于当前用户
+    """鍒涘缓浜ゆ槗"""
     result = await db.execute(
         select(Account).where(Account.id == txn_data.account_id, Account.user_id == current_user.id)
     )
@@ -101,7 +97,6 @@ async def create_transaction(
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
     
-    # 创建交易
     txn_dict = txn_data.model_dump()
     txn_dict["user_id"] = current_user.id
     if txn_dict.get("tags"):
@@ -110,7 +105,6 @@ async def create_transaction(
     transaction = Transaction(**txn_dict)
     db.add(transaction)
     
-    # 更新账户余额
     if txn_data.transaction_type == "income":
         account.balance += txn_data.amount
     else:
@@ -133,7 +127,7 @@ async def delete_transaction(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """删除交易"""
+    """鍒犻櫎浜ゆ槗"""
     result = await db.execute(
         select(Transaction).where(Transaction.id == transaction_id, Transaction.user_id == current_user.id)
     )
@@ -141,7 +135,6 @@ async def delete_transaction(
     if not transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
     
-    # 恢复账户余额
     result = await db.execute(select(Account).where(Account.id == transaction.account_id))
     account = result.scalar_one()
     if transaction.transaction_type == "income":

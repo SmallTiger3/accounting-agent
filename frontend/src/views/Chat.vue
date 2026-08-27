@@ -1,11 +1,10 @@
 <template>
   <div class="chat-container">
-    <!-- ×ó²à»á»°ÁĞ±í -->
     <div class="session-list">
       <div class="session-header">
-        <h3>¶Ô»°ÀúÊ·</h3>
+        <h3>å¯¹è¯å†å²</h3>
         <el-button type="primary" size="small" @click="newSession">
-          <el-icon><Plus /></el-icon> ĞÂ¶Ô»°
+          <el-icon><Plus /></el-icon> æ–°å¯¹è¯
         </el-button>
       </div>
       <div class="sessions">
@@ -15,9 +14,9 @@
           :class="['session-item', { active: currentSessionId === session.id }]"
           @click="selectSession(session.id)"
         >
-          <div class="session-title">{{ session.title || 'ĞÂ¶Ô»°' }}</div>
+          <div class="session-title">{{ session.title || 'æ–°å¯¹è¯' }}</div>
           <div class="session-meta">
-            <span>{{ session.message_count }}ÌõÏûÏ¢</span>
+            <span>{{ session.message_count }}æ¡æ¶ˆæ¯</span>
             <el-button
               type="danger"
               size="small"
@@ -31,13 +30,12 @@
       </div>
     </div>
     
-    <!-- ÓÒ²àÁÄÌìÇøÓò -->
     <div class="chat-main">
       <div class="messages" ref="messagesContainer">
         <div v-if="messages.length === 0" class="empty-state">
           <el-icon size="64" color="#c0c4cc"><ChatDotRound /></el-icon>
-          <h3>¿ªÊ¼ºÍAI¼ÇÕËÖúÊÖ¶Ô»°</h3>
-          <p>ÊÔÊÔËµ£º"½ñÌìÎç²Í»¨ÁË35Ôª"</p>
+          <h3>å¼€å§‹å’ŒAIè®°è´¦åŠ©æ‰‹å¯¹è¯</h3>
+          <p>è¯•è¯•è¯´ï¼š"ä»Šå¤©åˆé¤èŠ±äº†35å…ƒ"</p>
         </div>
         
         <div v-for="msg in messages" :key="msg.id" :class="['message', msg.role]">
@@ -74,7 +72,7 @@
           v-model="inputText"
           type="textarea"
           :rows="2"
-          placeholder="ÊäÈëÏûÏ¢£¬ÀıÈç£º½ñÌìÎç²Í»¨ÁË35Ôª"
+          placeholder="è¾“å…¥æ¶ˆæ¯ï¼Œä¾‹å¦‚ï¼šä»Šå¤©åˆé¤èŠ±äº†35å…ƒ"
           @keydown.enter.exact.prevent="sendMessage"
           :disabled="sending"
         />
@@ -84,7 +82,7 @@
           @click="sendMessage"
           :disabled="!inputText.trim()"
         >
-          ·¢ËÍ
+          å‘é€
         </el-button>
       </div>
     </div>
@@ -92,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { chatApi } from '@/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
@@ -136,7 +134,6 @@ async function sendMessage() {
   const text = inputText.value.trim()
   if (!text || sending.value) return
   
-  // Ìí¼ÓÓÃ»§ÏûÏ¢µ½½çÃæ
   const userMsg = {
     id: Date.now(),
     role: 'user',
@@ -151,22 +148,19 @@ async function sendMessage() {
   try {
     const response: any = await chatApi.sendMessage(text, currentSessionId.value || undefined)
     
-    // Ìí¼ÓAI»Ø¸´
     messages.value.push(response.message)
     currentSessionId.value = response.session_id
     
-    // ÏÔÊ¾Ô¤Ëã¸æ¾¯
     if (response.budget_alerts?.length > 0) {
       response.budget_alerts.forEach((alert: string) => {
         ElMessage.warning(alert)
       })
     }
     
-    // Ë¢ĞÂ»á»°ÁĞ±í
     await loadSessions()
     scrollToBottom()
   } catch (error) {
-    ElMessage.error('·¢ËÍÊ§°Ü£¬ÇëÖØÊÔ')
+    ElMessage.error('å‘é€å¤±è´¥ï¼Œè¯·é‡è¯•')
   } finally {
     sending.value = false
   }
@@ -174,15 +168,15 @@ async function sendMessage() {
 
 async function deleteSession(sessionId: number) {
   try {
-    await ElMessageBox.confirm('È·¶¨ÒªÉ¾³ıÕâ¸ö¶Ô»°Âğ£¿', 'È·ÈÏ')
+    await ElMessageBox.confirm('ç¡®å®šè¦åˆ é™¤è¿™ä¸ªå¯¹è¯å—ï¼Ÿ', 'ç¡®è®¤')
     await chatApi.deleteSession(sessionId)
     if (currentSessionId.value === sessionId) {
       newSession()
     }
     await loadSessions()
-    ElMessage.success('ÒÑÉ¾³ı')
+    ElMessage.success('å·²åˆ é™¤')
   } catch (error) {
-    // ÓÃ»§È¡Ïû
+    // ç”¨æˆ·å–æ¶ˆ
   }
 }
 

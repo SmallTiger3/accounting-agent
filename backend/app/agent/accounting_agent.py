@@ -1,32 +1,31 @@
 import json
 from typing import Optional, List
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .llm_factory import create_llm
 from .tools import add_transaction, query_transactions, analyze_spending, check_budget, get_spending_insights
 
 
-SYSTEM_PROMPT = """ÄãÊÇÒ»¸ö×¨ÒµµÄ¼ÇÕËÖúÊÖ£¬°ïÖúÓÃ»§¹ÜÀí¸öÈË²ÆÎñ¡£
+SYSTEM_PROMPT = """ä½ æ˜¯ä¸€ä¸ªä¸“ä¸šçš„è®°è´¦åŠ©æ‰‹ï¼Œå¸®åŠ©ç”¨æˆ·ç®¡ç†ä¸ªäººè´¢åŠ¡ã€‚
 
-ÄãµÄÄÜÁ¦£º
-1. ×ÔÈ»ÓïÑÔ¼ÇÕË - ÓÃ»§¿ÉÒÔÓÃ×ÔÈ»ÓïÑÔÃèÊöÊÕÖ§£¬Äã»á×Ô¶¯½âÎö²¢¼ÇÂ¼
-2. ÖÇÄÜ·ÖÀà - ¸ù¾İÃèÊö×Ô¶¯Æ¥ÅäºÏÊÊµÄ·ÖÀà
-3. Ïû·Ñ·ÖÎö - °´Ê±¼ä¡¢·ÖÀàÍ³¼ÆÏû·ÑÇé¿ö
-4. Ô¤ËãÌáĞÑ - ¼ì²éÔ¤ËãÊ¹ÓÃÇé¿ö£¬³¬Ö§Ê±ÌáĞÑÓÃ»§
-5. ²ÆÎñ½¨Òé - »ùÓÚÏû·ÑÄ£Ê½Ìá¹©¸öĞÔ»¯½¨Òé
+ä½ çš„èƒ½åŠ›ï¼š
+1. è‡ªç„¶è¯­è¨€è®°è´¦ - ç”¨æˆ·å¯ä»¥ç”¨è‡ªç„¶è¯­è¨€æè¿°æ”¶æ”¯ï¼Œä½ ä¼šè‡ªåŠ¨è§£æå¹¶è®°å½•
+2. æ™ºèƒ½åˆ†ç±» - æ ¹æ®æè¿°è‡ªåŠ¨åŒ¹é…åˆé€‚çš„åˆ†ç±»
+3. æ¶ˆè´¹åˆ†æ - æŒ‰æ—¶é—´ã€åˆ†ç±»ç»Ÿè®¡æ¶ˆè´¹æƒ…å†µ
+4. é¢„ç®—æé†’ - æ£€æŸ¥é¢„ç®—ä½¿ç”¨æƒ…å†µï¼Œè¶…æ”¯æ—¶æé†’ç”¨æˆ·
+5. è´¢åŠ¡å»ºè®® - åŸºäºæ¶ˆè´¹æ¨¡å¼æä¾›ä¸ªæ€§åŒ–å»ºè®®
 
-³£¼û·ÖÀà²Î¿¼£º
-- Ö§³ö£º²ÍÒû¡¢½»Í¨¡¢¹ºÎï¡¢ÓéÀÖ¡¢×¡·¿¡¢Ò½ÁÆ¡¢½ÌÓı¡¢ÈÕÓÃÆ·¡¢Í¨Ñ¶¡¢·şÊÎ¡¢ÆäËûÖ§³ö
-- ÊÕÈë£º¹¤×Ê¡¢½±½ğ¡¢Í¶×ÊÊÕÒæ¡¢¼æÖ°¡¢ºì°ü¡¢ÆäËûÊÕÈë
+å¸¸è§åˆ†ç±»å‚è€ƒï¼š
+- æ”¯å‡ºï¼šé¤é¥®ã€äº¤é€šã€è´­ç‰©ã€å¨±ä¹ã€ä½æˆ¿ã€åŒ»ç–—ã€æ•™è‚²ã€æ—¥ç”¨å“ã€é€šè®¯ã€æœé¥°ã€å…¶ä»–æ”¯å‡º
+- æ”¶å…¥ï¼šå·¥èµ„ã€å¥–é‡‘ã€æŠ•èµ„æ”¶ç›Šã€å…¼èŒã€çº¢åŒ…ã€å…¶ä»–æ”¶å…¥
 
-»Ø¸´¹æÔò£º
-- Ê¹ÓÃÖĞÎÄ»Ø¸´
-- ¼ÇÕË³É¹¦ºó¼òÒªÈ·ÈÏ£¬²¢Ñ¯ÎÊÊÇ·ñĞèÒª²é¿´·ÖÎö
-- ·ÖÎöÊı¾İÊ±ÓÃÇåÎúµÄ¸ñÊ½Õ¹Ê¾
-- ¸ø³öÊµÓÃµÄ²ÆÎñ½¨Òé
-- Èç¹ûÓÃ»§ÊäÈë²»Ã÷È·£¬Ö÷¶¯Ñ¯ÎÊÈ·ÈÏ
+å›å¤è§„åˆ™ï¼š
+- ä½¿ç”¨ä¸­æ–‡å›å¤
+- è®°è´¦æˆåŠŸåç®€è¦ç¡®è®¤ï¼Œå¹¶è¯¢é—®æ˜¯å¦éœ€è¦æŸ¥çœ‹åˆ†æ
+- åˆ†ææ•°æ®æ—¶ç”¨æ¸…æ™°çš„æ ¼å¼å±•ç¤º
+- ç»™å‡ºå®ç”¨çš„è´¢åŠ¡å»ºè®®
+- å¦‚æœç”¨æˆ·è¾“å…¥ä¸æ˜ç¡®ï¼Œä¸»åŠ¨è¯¢é—®ç¡®è®¤
 """
 
 
@@ -49,12 +48,10 @@ class AccountingAgent:
         message: str,
         chat_history: Optional[List[dict]] = None,
     ) -> dict:
-        """´¦ÀíÓÃ»§ÏûÏ¢"""
+        """å¤„ç†ç”¨æˆ·æ¶ˆæ¯"""
         
-        # ¹¹½¨ÏûÏ¢ÁĞ±í
         messages = [SystemMessage(content=SYSTEM_PROMPT)]
         
-        # Ìí¼ÓÀúÊ·ÏûÏ¢
         if chat_history:
             for msg in chat_history:
                 if msg["role"] == "user":
@@ -62,24 +59,18 @@ class AccountingAgent:
                 elif msg["role"] == "assistant":
                     messages.append(AIMessage(content=msg["content"]))
         
-        # Ìí¼Óµ±Ç°ÓÃ»§ÏûÏ¢
         messages.append(HumanMessage(content=message))
         
-        # µ÷ÓÃLLM
         response = await self.llm_with_tools.ainvoke(messages)
         
-        # ´¦Àí¹¤¾ßµ÷ÓÃ
         tool_results = []
         if hasattr(response, 'tool_calls') and response.tool_calls:
             for tool_call in response.tool_calls:
                 tool_name = tool_call["name"]
                 tool_args = tool_call["args"]
-                
-                # ×¢ÈëdbºÍuser_id
                 tool_args["db"] = db
                 tool_args["user_id"] = user_id
                 
-                # Ö´ĞĞ¹¤¾ß
                 for tool in self.tools:
                     if tool.name == tool_name:
                         result = await tool.ainvoke(tool_args)
@@ -89,15 +80,13 @@ class AccountingAgent:
                         })
                         break
             
-            # ½«¹¤¾ß½á¹û¼ÓÈëÏûÏ¢£¬ÔÙ´Îµ÷ÓÃLLMÉú³É×îÖÕ»Ø¸´
             messages.append(response)
             for tr in tool_results:
-                tool_msg = f"¹¤¾ß {tr['tool']} µÄ½á¹û£º{json.dumps(tr['result'], ensure_ascii=False)}"
+                tool_msg = f"å·¥å…· {tr['tool']} çš„ç»“æœï¼š{json.dumps(tr['result'], ensure_ascii=False)}"
                 messages.append(SystemMessage(content=tool_msg))
             
             response = await self.llm_with_tools.ainvoke(messages)
         
-        # ÌáÈ¡Ô¤Ëã¸æ¾¯
         budget_alerts = []
         for tr in tool_results:
             if tr["tool"] == "check_budget" and tr["result"].get("has_alerts"):

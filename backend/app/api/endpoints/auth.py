@@ -7,23 +7,20 @@ from ...models.user import User
 from ...schemas.user import UserCreate, UserLogin, UserResponse, Token
 from ...core.security import get_password_hash, verify_password, create_access_token
 
-router = APIRouter(prefix="/auth", tags=["认证"])
+router = APIRouter(prefix="/auth", tags=["璁よ瘉"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
-    """用户注册"""
-    # 检查用户名是否已存在
+    """鐢ㄦ埛娉ㄥ唽"""
     result = await db.execute(select(User).where(User.username == user_data.username))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already exists")
     
-    # 检查邮箱是否已存在
     result = await db.execute(select(User).where(User.email == user_data.email))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email already exists")
     
-    # 创建用户
     user = User(
         username=user_data.username,
         email=user_data.email,
@@ -38,7 +35,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 async def login(login_data: UserLogin, db: AsyncSession = Depends(get_db)):
-    """用户登录"""
+    """鐢ㄦ埛鐧诲綍"""
     result = await db.execute(select(User).where(User.username == login_data.username))
     user = result.scalar_one_or_none()
     

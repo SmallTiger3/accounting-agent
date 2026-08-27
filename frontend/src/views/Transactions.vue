@@ -1,66 +1,64 @@
 <template>
   <div class="transactions-page">
     <div class="page-header">
-      <h2>½»Ò×¼ÇÂ¼</h2>
+      <h2>äº¤æ˜“è®°å½•</h2>
       <el-button type="primary" @click="showAddDialog = true">
-        <el-icon><Plus /></el-icon> ¼ÇÒ»±Ê
+        <el-icon><Plus /></el-icon> è®°ä¸€ç¬”
       </el-button>
     </div>
     
-    <!-- É¸Ñ¡Ìõ¼ş -->
     <el-card class="filter-card">
       <el-form :inline="true" :model="filters">
-        <el-form-item label="ÀàĞÍ">
-          <el-select v-model="filters.transaction_type" clearable placeholder="È«²¿">
-            <el-option label="ÊÕÈë" value="income" />
-            <el-option label="Ö§³ö" value="expense" />
+        <el-form-item label="ç±»å‹">
+          <el-select v-model="filters.transaction_type" clearable placeholder="å…¨éƒ¨">
+            <el-option label="æ”¶å…¥" value="income" />
+            <el-option label="æ”¯å‡º" value="expense" />
           </el-select>
         </el-form-item>
-        <el-form-item label="ÈÕÆÚ·¶Î§">
+        <el-form-item label="æ—¥æœŸèŒƒå›´">
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="ÖÁ"
-            start-placeholder="¿ªÊ¼ÈÕÆÚ"
-            end-placeholder="½áÊøÈÕÆÚ"
+            range-separator="è‡³"
+            start-placeholder="å¼€å§‹æ—¥æœŸ"
+            end-placeholder="ç»“æŸæ—¥æœŸ"
             value-format="YYYY-MM-DD"
             @change="handleDateChange"
           />
         </el-form-item>
-        <el-form-item label="¹Ø¼ü´Ê">
-          <el-input v-model="filters.keyword" placeholder="ËÑË÷ÃèÊö" clearable />
+        <el-form-item label="å…³é”®è¯">
+          <el-input v-model="filters.keyword" placeholder="æœç´¢æè¿°" clearable />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadTransactions">²éÑ¯</el-button>
+          <el-button type="primary" @click="loadTransactions">æŸ¥è¯¢</el-button>
         </el-form-item>
       </el-form>
     </el-card>
     
-    <!-- ½»Ò×ÁĞ±í -->
     <el-card class="table-card">
       <el-table :data="transactions" v-loading="loading" stripe>
-        <el-table-column prop="transaction_date" label="ÈÕÆÚ" width="120" />
-        <el-table-column prop="transaction_type" label="ÀàĞÍ" width="80">
+        <el-table-column prop="transaction_date" label="æ—¥æœŸ" width="120" />
+        <el-table-column prop="transaction_type" label="ç±»å‹" width="80">
           <template #default="{ row }">
             <el-tag :type="row.transaction_type === 'income' ? 'success' : 'danger'">
-              {{ row.transaction_type === 'income' ? 'ÊÕÈë' : 'Ö§³ö' }}
+              {{ row.transaction_type === 'income' ? 'æ”¶å…¥' : 'æ”¯å‡º' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="category_name" label="·ÖÀà" width="100" />
-        <el-table-column prop="description" label="ÃèÊö" />
-        <el-table-column prop="amount" label="½ğ¶î" width="120" align="right">
+        <el-table-column prop="category_name" label="åˆ†ç±»" width="100" />
+        <el-table-column prop="description" label="æè¿°" />
+        <el-table-column prop="amount" label="é‡‘é¢" width="120" align="right">
           <template #default="{ row }">
             <span :class="row.transaction_type === 'income' ? 'income' : 'expense'">
-              {{ row.transaction_type === 'income' ? '+' : '-' }}£¤{{ row.amount.toFixed(2) }}
+              {{ row.transaction_type === 'income' ? '+' : '-' }}Â¥{{ row.amount.toFixed(2) }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="account_name" label="ÕË»§" width="120" />
-        <el-table-column label="²Ù×÷" width="80">
+        <el-table-column prop="account_name" label="è´¦æˆ·" width="120" />
+        <el-table-column label="æ“ä½œ" width="80">
           <template #default="{ row }">
             <el-button type="danger" size="small" link @click="handleDelete(row.id)">
-              É¾³ı
+              åˆ é™¤
             </el-button>
           </template>
         </el-table-column>
@@ -77,20 +75,19 @@
       />
     </el-card>
     
-    <!-- Ìí¼Ó½»Ò×¶Ô»°¿ò -->
-    <el-dialog v-model="showAddDialog" title="¼ÇÒ»±Ê" width="500px">
+    <el-dialog v-model="showAddDialog" title="è®°ä¸€ç¬”" width="500px">
       <el-form :model="addForm" :rules="addRules" ref="addFormRef" label-width="80px">
-        <el-form-item label="ÀàĞÍ" prop="transaction_type">
+        <el-form-item label="ç±»å‹" prop="transaction_type">
           <el-radio-group v-model="addForm.transaction_type">
-            <el-radio-button value="expense">Ö§³ö</el-radio-button>
-            <el-radio-button value="income">ÊÕÈë</el-radio-button>
+            <el-radio-button value="expense">æ”¯å‡º</el-radio-button>
+            <el-radio-button value="income">æ”¶å…¥</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="½ğ¶î" prop="amount">
+        <el-form-item label="é‡‘é¢" prop="amount">
           <el-input-number v-model="addForm.amount" :min="0.01" :precision="2" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="·ÖÀà" prop="category_id">
-          <el-select v-model="addForm.category_id" placeholder="Ñ¡Ôñ·ÖÀà" style="width: 100%">
+        <el-form-item label="åˆ†ç±»" prop="category_id">
+          <el-select v-model="addForm.category_id" placeholder="é€‰æ‹©åˆ†ç±»" style="width: 100%">
             <el-option
               v-for="cat in filteredCategories"
               :key="cat.id"
@@ -99,8 +96,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="ÕË»§" prop="account_id">
-          <el-select v-model="addForm.account_id" placeholder="Ñ¡ÔñÕË»§" style="width: 100%">
+        <el-form-item label="è´¦æˆ·" prop="account_id">
+          <el-select v-model="addForm.account_id" placeholder="é€‰æ‹©è´¦æˆ·" style="width: 100%">
             <el-option
               v-for="acc in accounts"
               :key="acc.id"
@@ -109,16 +106,16 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="ÈÕÆÚ" prop="transaction_date">
+        <el-form-item label="æ—¥æœŸ" prop="transaction_date">
           <el-date-picker v-model="addForm.transaction_date" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="ÃèÊö">
+        <el-form-item label="æè¿°">
           <el-input v-model="addForm.description" type="textarea" :rows="2" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showAddDialog = false">È¡Ïû</el-button>
-        <el-button type="primary" @click="handleAdd" :loading="adding">È·¶¨</el-button>
+        <el-button @click="showAddDialog = false">å–æ¶ˆ</el-button>
+        <el-button type="primary" @click="handleAdd" :loading="adding">ç¡®å®š</el-button>
       </template>
     </el-dialog>
   </div>
@@ -161,11 +158,11 @@ const addForm = reactive({
 })
 
 const addRules = {
-  transaction_type: [{ required: true, message: 'ÇëÑ¡ÔñÀàĞÍ' }],
-  amount: [{ required: true, message: 'ÇëÊäÈë½ğ¶î' }],
-  category_id: [{ required: true, message: 'ÇëÑ¡Ôñ·ÖÀà' }],
-  account_id: [{ required: true, message: 'ÇëÑ¡ÔñÕË»§' }],
-  transaction_date: [{ required: true, message: 'ÇëÑ¡ÔñÈÕÆÚ' }],
+  transaction_type: [{ required: true, message: 'è¯·é€‰æ‹©ç±»å‹' }],
+  amount: [{ required: true, message: 'è¯·è¾“å…¥é‡‘é¢' }],
+  category_id: [{ required: true, message: 'è¯·é€‰æ‹©åˆ†ç±»' }],
+  account_id: [{ required: true, message: 'è¯·é€‰æ‹©è´¦æˆ·' }],
+  transaction_date: [{ required: true, message: 'è¯·é€‰æ‹©æ—¥æœŸ' }],
 }
 
 const filteredCategories = computed(() => {
@@ -189,7 +186,7 @@ async function loadTransactions() {
     transactions.value = data.items
     pagination.total = data.total
   } catch (error) {
-    ElMessage.error('¼ÓÔØÊ§°Ü')
+    ElMessage.error('åŠ è½½å¤±è´¥')
   } finally {
     loading.value = false
   }
@@ -226,10 +223,9 @@ async function handleAdd() {
     await addFormRef.value?.validate()
     adding.value = true
     await transactionsApi.create(addForm)
-    ElMessage.success('Ìí¼Ó³É¹¦')
+    ElMessage.success('æ·»åŠ æˆåŠŸ')
     showAddDialog.value = false
     loadTransactions()
-    // ÖØÖÃ±íµ¥
     addForm.amount = 0
     addForm.description = ''
   } catch (error: any) {
@@ -243,12 +239,12 @@ async function handleAdd() {
 
 async function handleDelete(id: number) {
   try {
-    await ElMessageBox.confirm('È·¶¨ÒªÉ¾³ıÕâ±Ê½»Ò×Âğ£¿', 'È·ÈÏ')
+    await ElMessageBox.confirm('ç¡®å®šè¦åˆ é™¤è¿™ç¬”äº¤æ˜“å—ï¼Ÿ', 'ç¡®è®¤')
     await transactionsApi.delete(id)
-    ElMessage.success('ÒÑÉ¾³ı')
+    ElMessage.success('å·²åˆ é™¤')
     loadTransactions()
   } catch (error) {
-    // ÓÃ»§È¡Ïû
+    // ç”¨æˆ·å–æ¶ˆ
   }
 }
 </script>

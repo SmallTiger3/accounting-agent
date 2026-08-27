@@ -9,11 +9,9 @@ from .api.router import api_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     await init_db()
     await seed_default_categories()
     yield
-    # Shutdown
 
 
 app = FastAPI(
@@ -22,7 +20,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -31,7 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routes
 app.include_router(api_router)
 
 
@@ -46,18 +42,18 @@ async def health():
 
 
 async def seed_default_categories():
-    """³õÊ¼»¯Ä¬ÈÏ·ÖÀà"""
+    """åˆå§‹åŒ–é»˜è®¤åˆ†ç±»"""
     from sqlalchemy import select
     from .db.session import async_session
     from .models.category import Category
     
     default_categories = [
-        ("²ÍÒû", "expense"), ("½»Í¨", "expense"), ("¹ºÎï", "expense"),
-        ("ÓéÀÖ", "expense"), ("×¡·¿", "expense"), ("Ò½ÁÆ", "expense"),
-        ("½ÌÓı", "expense"), ("ÈÕÓÃÆ·", "expense"), ("Í¨Ñ¶", "expense"),
-        ("·şÊÎ", "expense"), ("ÆäËûÖ§³ö", "expense"),
-        ("¹¤×Ê", "income"), ("½±½ğ", "income"), ("Í¶×ÊÊÕÒæ", "income"),
-        ("¼æÖ°", "income"), ("ºì°ü", "income"), ("ÆäËûÊÕÈë", "income"),
+        ("é¤é¥®", "expense"), ("äº¤é€š", "expense"), ("è´­ç‰©", "expense"),
+        ("å¨±ä¹", "expense"), ("ä½æˆ¿", "expense"), ("åŒ»ç–—", "expense"),
+        ("æ•™è‚²", "expense"), ("æ—¥ç”¨å“", "expense"), ("é€šè®¯", "expense"),
+        ("æœé¥°", "expense"), ("å…¶ä»–æ”¯å‡º", "expense"),
+        ("å·¥èµ„", "income"), ("å¥–é‡‘", "income"), ("æŠ•èµ„æ”¶ç›Š", "income"),
+        ("å…¼èŒ", "income"), ("çº¢åŒ…", "income"), ("å…¶ä»–æ”¶å…¥", "income"),
     ]
     
     async with async_session() as session:

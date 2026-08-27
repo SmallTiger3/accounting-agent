@@ -4,45 +4,45 @@
       <template #header>
         <div class="card-header">
           <el-icon size="40" color="#409eff"><Wallet /></el-icon>
-          <h2>¼ÇÕËAgent</h2>
-          <p class="subtitle">ÖÇÄÜAI¼ÇÕËÖúÊÖ</p>
+          <h2>è®°è´¦Agent</h2>
+          <p class="subtitle">æ™ºèƒ½AIè®°è´¦åŠ©æ‰‹</p>
         </div>
       </template>
       
       <el-tabs v-model="activeTab">
-        <el-tab-pane label="µÇÂ¼" name="login">
+        <el-tab-pane label="ç™»å½•" name="login">
           <el-form :model="loginForm" :rules="rules" ref="loginFormRef" @submit.prevent="handleLogin">
             <el-form-item prop="username">
-              <el-input v-model="loginForm.username" placeholder="ÓÃ»§Ãû" prefix-icon="User" />
+              <el-input v-model="loginForm.username" placeholder="ç”¨æˆ·å" prefix-icon="User" />
             </el-form-item>
             <el-form-item prop="password">
-              <el-input v-model="loginForm.password" type="password" placeholder="ÃÜÂë" prefix-icon="Lock" show-password />
+              <el-input v-model="loginForm.password" type="password" placeholder="å¯†ç " prefix-icon="Lock" show-password />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :loading="loading" @click="handleLogin" style="width: 100%">
-                µÇÂ¼
+                ç™»å½•
               </el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
         
-        <el-tab-pane label="×¢²á" name="register">
+        <el-tab-pane label="æ³¨å†Œ" name="register">
           <el-form :model="registerForm" :rules="registerRules" ref="registerFormRef" @submit.prevent="handleRegister">
             <el-form-item prop="username">
-              <el-input v-model="registerForm.username" placeholder="ÓÃ»§Ãû" prefix-icon="User" />
+              <el-input v-model="registerForm.username" placeholder="ç”¨æˆ·å" prefix-icon="User" />
             </el-form-item>
             <el-form-item prop="email">
-              <el-input v-model="registerForm.email" placeholder="ÓÊÏä" prefix-icon="Message" />
+              <el-input v-model="registerForm.email" placeholder="é‚®ç®±" prefix-icon="Message" />
             </el-form-item>
             <el-form-item prop="password">
-              <el-input v-model="registerForm.password" type="password" placeholder="ÃÜÂë" prefix-icon="Lock" show-password />
+              <el-input v-model="registerForm.password" type="password" placeholder="å¯†ç " prefix-icon="Lock" show-password />
             </el-form-item>
             <el-form-item prop="confirmPassword">
-              <el-input v-model="registerForm.confirmPassword" type="password" placeholder="È·ÈÏÃÜÂë" prefix-icon="Lock" show-password />
+              <el-input v-model="registerForm.confirmPassword" type="password" placeholder="ç¡®è®¤å¯†ç " prefix-icon="Lock" show-password />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :loading="loading" @click="handleRegister" style="width: 100%">
-                ×¢²á
+                æ³¨å†Œ
               </el-button>
             </el-form-item>
           </el-form>
@@ -79,29 +79,29 @@ const registerForm = reactive({
 })
 
 const rules = {
-  username: [{ required: true, message: 'ÇëÊäÈëÓÃ»§Ãû', trigger: 'blur' }],
-  password: [{ required: true, message: 'ÇëÊäÈëÃÜÂë', trigger: 'blur' }],
+  username: [{ required: true, message: 'è¯·è¾“å…¥ç”¨æˆ·å', trigger: 'blur' }],
+  password: [{ required: true, message: 'è¯·è¾“å…¥å¯†ç ', trigger: 'blur' }],
 }
 
 const registerRules = {
   username: [
-    { required: true, message: 'ÇëÊäÈëÓÃ»§Ãû', trigger: 'blur' },
-    { min: 3, max: 50, message: 'ÓÃ»§Ãû³¤¶ÈÔÚ3-50Ö®¼ä', trigger: 'blur' },
+    { required: true, message: 'è¯·è¾“å…¥ç”¨æˆ·å', trigger: 'blur' },
+    { min: 3, max: 50, message: 'ç”¨æˆ·åé•¿åº¦åœ¨3-50ä¹‹é—´', trigger: 'blur' },
   ],
   email: [
-    { required: true, message: 'ÇëÊäÈëÓÊÏä', trigger: 'blur' },
-    { type: 'email', message: 'ÇëÊäÈëÕıÈ·µÄÓÊÏä¸ñÊ½', trigger: 'blur' },
+    { required: true, message: 'è¯·è¾“å…¥é‚®ç®±', trigger: 'blur' },
+    { type: 'email', message: 'è¯·è¾“å…¥æ­£ç¡®çš„é‚®ç®±æ ¼å¼', trigger: 'blur' },
   ],
   password: [
-    { required: true, message: 'ÇëÊäÈëÃÜÂë', trigger: 'blur' },
-    { min: 6, message: 'ÃÜÂë³¤¶ÈÖÁÉÙ6Î»', trigger: 'blur' },
+    { required: true, message: 'è¯·è¾“å…¥å¯†ç ', trigger: 'blur' },
+    { min: 6, message: 'å¯†ç é•¿åº¦è‡³å°‘6ä½', trigger: 'blur' },
   ],
   confirmPassword: [
-    { required: true, message: 'ÇëÈ·ÈÏÃÜÂë', trigger: 'blur' },
+    { required: true, message: 'è¯·ç¡®è®¤å¯†ç ', trigger: 'blur' },
     {
       validator: (rule: any, value: string, callback: Function) => {
         if (value !== registerForm.password) {
-          callback(new Error('Á½´ÎÊäÈëµÄÃÜÂë²»Ò»ÖÂ'))
+          callback(new Error('ä¸¤æ¬¡è¾“å…¥çš„å¯†ç ä¸ä¸€è‡´'))
         } else {
           callback()
         }
@@ -116,7 +116,7 @@ async function handleLogin() {
     await loginFormRef.value?.validate()
     loading.value = true
     await authStore.login(loginForm.username, loginForm.password)
-    ElMessage.success('µÇÂ¼³É¹¦')
+    ElMessage.success('ç™»å½•æˆåŠŸ')
     router.push('/')
   } catch (error: any) {
     if (error.response?.data?.detail) {
@@ -132,7 +132,7 @@ async function handleRegister() {
     await registerFormRef.value?.validate()
     loading.value = true
     await authStore.register(registerForm.username, registerForm.email, registerForm.password)
-    ElMessage.success('×¢²á³É¹¦£¬ÇëµÇÂ¼')
+    ElMessage.success('æ³¨å†ŒæˆåŠŸï¼Œè¯·ç™»å½•')
     activeTab.value = 'login'
     loginForm.username = registerForm.username
     loginForm.password = ''

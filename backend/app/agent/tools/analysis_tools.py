@@ -1,8 +1,7 @@
 import json
 from datetime import date, timedelta
-from decimal import Decimal
 from langchain_core.tools import tool
-from sqlalchemy import select, func, extract
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...models.transaction import Transaction
@@ -18,12 +17,12 @@ async def analyze_spending(
     start_date: str = None,
     end_date: str = None,
 ) -> str:
-    """·ÖÎöÏû·ÑÇé¿ö£¬°´·ÖÀàÍ³¼Æ¡£
+    """åˆ†ææ¶ˆè´¹æƒ…å†µï¼ŒæŒ‰åˆ†ç±»ç»Ÿè®¡ã€‚
     
     Args:
-        period: Ê±¼ä·¶Î§£¬today/week/month/year/custom
-        start_date: ×Ô¶¨Òå¿ªÊ¼ÈÕÆÚ£¨period=customÊ±Ê¹ÓÃ£©
-        end_date: ×Ô¶¨Òå½áÊøÈÕÆÚ£¨period=customÊ±Ê¹ÓÃ£©
+        period: æ—¶é—´èŒƒå›´ï¼Œtoday/week/month/year/custom
+        start_date: è‡ªå®šä¹‰å¼€å§‹æ—¥æœŸï¼ˆperiod=customæ—¶ä½¿ç”¨ï¼‰
+        end_date: è‡ªå®šä¹‰ç»“æŸæ—¥æœŸï¼ˆperiod=customæ—¶ä½¿ç”¨ï¼‰
     """
     try:
         today = date.today()
@@ -46,7 +45,6 @@ async def analyze_spending(
             start = today.replace(day=1)
             end = today
         
-        # °´·ÖÀàÍ³¼ÆÖ§³ö
         result = await db.execute(
             select(
                 Category.name,
@@ -61,7 +59,6 @@ async def analyze_spending(
         )
         expense_by_category = result.all()
         
-        # °´·ÖÀàÍ³¼ÆÊÕÈë
         result = await db.execute(
             select(
                 Category.name,
@@ -76,7 +73,6 @@ async def analyze_spending(
         )
         income_by_category = result.all()
         
-        # ¼ÆËã×Ü¶î
         total_expense = sum(float(row.total) for row in expense_by_category)
         total_income = sum(float(row.total) for row in income_by_category)
         
@@ -107,15 +103,13 @@ async def check_budget(
     db: AsyncSession,
     user_id: int,
 ) -> str:
-    """¼ì²é±¾ÔÂÔ¤ËãÊ¹ÓÃÇé¿ö£¬·µ»Ø³¬Ö§Ô¤¾¯¡£
-    """
+    """æ£€æŸ¥æœ¬æœˆé¢„ç®—ä½¿ç”¨æƒ…å†µï¼Œè¿”å›è¶…æ”¯é¢„è­¦ã€‚"""
     try:
         today = date.today()
         year = today.year
         month = today.month
         start_date = today.replace(day=1)
         
-        # »ñÈ¡±¾ÔÂÔ¤Ëã
         result = await db.execute(
             select(Budget).where(
                 Budget.user_id == user_id,
@@ -129,7 +123,6 @@ async def check_budget(
         budget_status = []
         
         for budget in budgets:
-            # ¼ÆËã¸Ã·ÖÀà±¾ÔÂÒÑ»¨·Ñ
             query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
                 Transaction.user_id == user_id,
                 Transaction.transaction_type == "expense",
@@ -139,11 +132,10 @@ async def check_budget(
             
             if budget.category_id:
                 query = query.where(Transaction.category_id == budget.category_id)
-                # »ñÈ¡·ÖÀàÃû³Æ
                 cat_result = await db.execute(select(Category.name).where(Category.id == budget.category_id))
-                category_name = cat_result.scalar_one_or_none() or "Î´Öª"
+                category_name = cat_result.scalar_one_or_none() or "æœªçŸ¥"
             else:
-                category_name = "×ÜÔ¤Ëã"
+                category_name = "æ€»é¢„ç®—"
             
             spent_result = await db.execute(query)
             spent = float(spent_result.scalar_one())
@@ -159,11 +151,10 @@ async def check_budget(
             }
             budget_status.append(status)
             
-            # ¼ì²éÊÇ·ñ³¬Ö§»ò½Ó½üÔ¤Ëã
             if usage_percent >= 100:
-                alerts.append(f"?? {category_name}Ô¤ËãÒÑ³¬Ö§£¡Ô¤Ëã £¤{budget_amount:.2f}£¬ÒÑ»¨·Ñ £¤{spent:.2f}")
+                alerts.append(f"âš ï¸ {category_name}é¢„ç®—å·²è¶…æ”¯ï¼é¢„ç®— Â¥{budget_amount:.2f}ï¼Œå·²èŠ±è´¹ Â¥{spent:.2f}")
             elif usage_percent >= float(budget.alert_threshold):
-                alerts.append(f"? {category_name}Ô¤Ëã¼´½«ÓÃ¾¡£¨{usage_percent:.1f}%£©£¬Ê£Óà £¤{budget_amount - spent:.2f}")
+                alerts.append(f"âš¡ {category_name}é¢„ç®—å³å°†ç”¨å°½ï¼ˆ{usage_percent:.1f}%ï¼‰ï¼Œå‰©ä½™ Â¥{budget_amount - spent:.2f}")
         
         return json.dumps({
             "success": True,

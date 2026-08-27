@@ -14,7 +14,7 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    """获取当前登录用户"""
+    """鑾峰彇褰撳墠鐧诲綍鐢ㄦ埛"""
     token = credentials.credentials
     payload = decode_token(token)
     

@@ -3,7 +3,7 @@
     <el-aside width="220px" class="aside">
       <div class="logo">
         <el-icon size="24"><Wallet /></el-icon>
-        <span>¼ÇÕËAgent</span>
+        <span>è®°è´¦Agent</span>
       </div>
       <el-menu
         :default-active="route.path"
@@ -15,23 +15,23 @@
       >
         <el-menu-item index="/">
           <el-icon><DataAnalysis /></el-icon>
-          <span>Êı¾İ¿´°å</span>
+          <span>æ•°æ®çœ‹æ¿</span>
         </el-menu-item>
         <el-menu-item index="/chat">
           <el-icon><ChatDotRound /></el-icon>
-          <span>AI¶Ô»°</span>
+          <span>AIå¯¹è¯</span>
         </el-menu-item>
         <el-menu-item index="/transactions">
           <el-icon><List /></el-icon>
-          <span>½»Ò×¼ÇÂ¼</span>
+          <span>äº¤æ˜“è®°å½•</span>
         </el-menu-item>
         <el-menu-item index="/accounts">
           <el-icon><CreditCard /></el-icon>
-          <span>ÕË»§¹ÜÀí</span>
+          <span>è´¦æˆ·ç®¡ç†</span>
         </el-menu-item>
         <el-menu-item index="/budgets">
           <el-icon><Wallet /></el-icon>
-          <span>Ô¤Ëã¹ÜÀí</span>
+          <span>é¢„ç®—ç®¡ç†</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -41,11 +41,11 @@
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-avatar :size="32" icon="User" />
-              <span>{{ authStore.user?.username || 'ÓÃ»§' }}</span>
+              <span>{{ authStore.user?.username || 'ç”¨æˆ·' }}</span>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="logout">ÍË³öµÇÂ¼</el-dropdown-item>
+                <el-dropdown-item command="logout">é€€å‡ºç™»å½•</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>

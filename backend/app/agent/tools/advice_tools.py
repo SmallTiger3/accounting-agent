@@ -14,17 +14,16 @@ async def get_spending_insights(
     user_id: int,
     months: int = 3,
 ) -> str:
-    """»ñÈ¡Ïû·Ñ¶´²ìºÍÇ÷ÊÆÊı¾İ£¬ÓÃÓÚÉú³É²ÆÎñ½¨Òé¡£
+    """è·å–æ¶ˆè´¹æ´å¯Ÿå’Œè¶‹åŠ¿æ•°æ®ï¼Œç”¨äºç”Ÿæˆè´¢åŠ¡å»ºè®®ã€‚
     
     Args:
-        months: ·ÖÎö×î½ü¼¸¸öÔÂµÄÊı¾İ
+        months: åˆ†ææœ€è¿‘å‡ ä¸ªæœˆçš„æ•°æ®
     """
     try:
         today = date.today()
         insights = []
         
         for i in range(months):
-            # ¼ÆËãÃ¿¸öÔÂµÄÆğÖ¹ÈÕÆÚ
             month_date = today.replace(day=1) - timedelta(days=i * 30)
             year = month_date.year
             month = month_date.month
@@ -34,7 +33,6 @@ async def get_spending_insights(
             else:
                 end = date(year, month + 1, 1) - timedelta(days=1)
             
-            # ¸ÃÔÂ×ÜÖ§³ö
             result = await db.execute(
                 select(func.coalesce(func.sum(Transaction.amount), 0)).where(
                     Transaction.user_id == user_id,
@@ -45,7 +43,6 @@ async def get_spending_insights(
             )
             total_expense = float(result.scalar_one())
             
-            # ¸ÃÔÂ×ÜÊÕÈë
             result = await db.execute(
                 select(func.coalesce(func.sum(Transaction.amount), 0)).where(
                     Transaction.user_id == user_id,
@@ -56,7 +53,6 @@ async def get_spending_insights(
             )
             total_income = float(result.scalar_one())
             
-            # ¸ÃÔÂTOP3Ö§³ö·ÖÀà
             result = await db.execute(
                 select(Category.name, func.sum(Transaction.amount).label("total")).join(
                     Category, Transaction.category_id == Category.id
@@ -78,14 +74,13 @@ async def get_spending_insights(
                 "top_expense_categories": top_categories,
             })
         
-        # ¼ÆËãÇ÷ÊÆ
         if len(insights) >= 2:
             recent = insights[0]["total_expense"]
             previous = insights[1]["total_expense"]
-            trend = "ÉÏÉı" if recent > previous else "ÏÂ½µ" if recent < previous else "³ÖÆ½"
+            trend = "ä¸Šå‡" if recent > previous else "ä¸‹é™" if recent < previous else "æŒå¹³"
             change_percent = ((recent - previous) / previous * 100) if previous > 0 else 0
         else:
-            trend = "Êı¾İ²»×ã"
+            trend = "æ•°æ®ä¸è¶³"
             change_percent = 0
         
         return json.dumps({

@@ -47,7 +47,6 @@ const router = createRouter({
   routes,
 })
 
-// Â·ÓÉÊØÎÀ
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   

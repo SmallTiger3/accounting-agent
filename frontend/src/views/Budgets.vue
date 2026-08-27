@@ -1,61 +1,59 @@
 <template>
   <div class="budgets-page">
     <div class="page-header">
-      <h2>Ô¤Ëã¹ÜÀí</h2>
+      <h2>é¢„ç®—ç®¡ç†</h2>
       <el-button type="primary" @click="showAddDialog = true">
-        <el-icon><Plus /></el-icon> Ìí¼ÓÔ¤Ëã
+        <el-icon><Plus /></el-icon> æ·»åŠ é¢„ç®—
       </el-button>
     </div>
     
-    <!-- Ô¤Ëã¸ÅÀÀ -->
     <el-row :gutter="20" class="budget-overview">
       <el-col :span="8">
         <el-card>
           <div class="overview-item">
-            <div class="overview-label">±¾ÔÂ×ÜÔ¤Ëã</div>
-            <div class="overview-value">£¤{{ totalBudget.toFixed(2) }}</div>
+            <div class="overview-label">æœ¬æœˆæ€»é¢„ç®—</div>
+            <div class="overview-value">Â¥{{ totalBudget.toFixed(2) }}</div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card>
           <div class="overview-item">
-            <div class="overview-label">ÒÑ»¨·Ñ</div>
-            <div class="overview-value expense">£¤{{ totalSpent.toFixed(2) }}</div>
+            <div class="overview-label">å·²èŠ±è´¹</div>
+            <div class="overview-value expense">Â¥{{ totalSpent.toFixed(2) }}</div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card>
           <div class="overview-item">
-            <div class="overview-label">Ê£ÓàÔ¤Ëã</div>
+            <div class="overview-label">å‰©ä½™é¢„ç®—</div>
             <div class="overview-value" :class="totalRemaining >= 0 ? 'income' : 'expense'">
-              £¤{{ totalRemaining.toFixed(2) }}
+              Â¥{{ totalRemaining.toFixed(2) }}
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
     
-    <!-- Ô¤ËãÁĞ±í -->
     <el-card class="budget-list">
       <el-table :data="budgets" v-loading="loading">
-        <el-table-column prop="category_name" label="·ÖÀà" width="150">
+        <el-table-column prop="category_name" label="åˆ†ç±»" width="150">
           <template #default="{ row }">
-            {{ row.category_name || '×ÜÔ¤Ëã' }}
+            {{ row.category_name || 'æ€»é¢„ç®—' }}
           </template>
         </el-table-column>
-        <el-table-column prop="amount" label="Ô¤Ëã½ğ¶î" width="120" align="right">
+        <el-table-column prop="amount" label="é¢„ç®—é‡‘é¢" width="120" align="right">
           <template #default="{ row }">
-            £¤{{ row.amount.toFixed(2) }}
+            Â¥{{ row.amount.toFixed(2) }}
           </template>
         </el-table-column>
-        <el-table-column prop="spent" label="ÒÑ»¨·Ñ" width="120" align="right">
+        <el-table-column prop="spent" label="å·²èŠ±è´¹" width="120" align="right">
           <template #default="{ row }">
-            <span class="expense">£¤{{ (row.spent || 0).toFixed(2) }}</span>
+            <span class="expense">Â¥{{ (row.spent || 0).toFixed(2) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Ê¹ÓÃ½ø¶È">
+        <el-table-column label="ä½¿ç”¨è¿›åº¦">
           <template #default="{ row }">
             <el-progress
               :percentage="row.usage_percent || 0"
@@ -65,33 +63,32 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="remaining" label="Ê£Óà" width="120" align="right">
+        <el-table-column prop="remaining" label="å‰©ä½™" width="120" align="right">
           <template #default="{ row }">
             <span :class="(row.remaining || 0) >= 0 ? 'income' : 'expense'">
-              £¤{{ (row.remaining || 0).toFixed(2) }}
+              Â¥{{ (row.remaining || 0).toFixed(2) }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="alert_threshold" label="Ô¤¾¯ãĞÖµ" width="100">
+        <el-table-column prop="alert_threshold" label="é¢„è­¦é˜ˆå€¼" width="100">
           <template #default="{ row }">
             {{ row.alert_threshold }}%
           </template>
         </el-table-column>
-        <el-table-column label="²Ù×÷" width="80">
+        <el-table-column label="æ“ä½œ" width="80">
           <template #default="{ row }">
             <el-button type="danger" size="small" link @click="handleDelete(row.id)">
-              É¾³ı
+              åˆ é™¤
             </el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
     
-    <!-- Ìí¼ÓÔ¤Ëã¶Ô»°¿ò -->
-    <el-dialog v-model="showAddDialog" title="Ìí¼ÓÔ¤Ëã" width="400px">
+    <el-dialog v-model="showAddDialog" title="æ·»åŠ é¢„ç®—" width="400px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
-        <el-form-item label="·ÖÀà">
-          <el-select v-model="form.category_id" placeholder="×ÜÔ¤Ëã£¨Áô¿Õ£©" clearable style="width: 100%">
+        <el-form-item label="åˆ†ç±»">
+          <el-select v-model="form.category_id" placeholder="æ€»é¢„ç®—ï¼ˆç•™ç©ºï¼‰" clearable style="width: 100%">
             <el-option
               v-for="cat in expenseCategories"
               :key="cat.id"
@@ -100,31 +97,31 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="½ğ¶î" prop="amount">
+        <el-form-item label="é‡‘é¢" prop="amount">
           <el-input-number v-model="form.amount" :min="1" :precision="2" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="ÖÜÆÚ">
+        <el-form-item label="å‘¨æœŸ">
           <el-select v-model="form.period" style="width: 100%">
-            <el-option label="ÔÂ¶È" value="monthly" />
-            <el-option label="ÖÜ¶È" value="weekly" />
-            <el-option label="Äê¶È" value="yearly" />
+            <el-option label="æœˆåº¦" value="monthly" />
+            <el-option label="å‘¨åº¦" value="weekly" />
+            <el-option label="å¹´åº¦" value="yearly" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Äê·İ" prop="year">
+        <el-form-item label="å¹´ä»½" prop="year">
           <el-input-number v-model="form.year" :min="2020" :max="2100" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="ÔÂ·İ" v-if="form.period === 'monthly'">
+        <el-form-item label="æœˆä»½" v-if="form.period === 'monthly'">
           <el-select v-model="form.month" style="width: 100%">
-            <el-option v-for="m in 12" :key="m" :label="`${m}ÔÂ`" :value="m" />
+            <el-option v-for="m in 12" :key="m" :label="`${m}æœˆ`" :value="m" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Ô¤¾¯ãĞÖµ">
+        <el-form-item label="é¢„è­¦é˜ˆå€¼">
           <el-slider v-model="form.alert_threshold" :min="0" :max="100" show-input />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showAddDialog = false">È¡Ïû</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">È·¶¨</el-button>
+        <el-button @click="showAddDialog = false">å–æ¶ˆ</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitting">ç¡®å®š</el-button>
       </template>
     </el-dialog>
   </div>
@@ -153,8 +150,8 @@ const form = reactive({
 })
 
 const rules = {
-  amount: [{ required: true, message: 'ÇëÊäÈë½ğ¶î' }],
-  year: [{ required: true, message: 'ÇëÊäÈëÄê·İ' }],
+  amount: [{ required: true, message: 'è¯·è¾“å…¥é‡‘é¢' }],
+  year: [{ required: true, message: 'è¯·è¾“å…¥å¹´ä»½' }],
 }
 
 const totalBudget = computed(() => budgets.value.reduce((sum, b) => sum + b.amount, 0))
@@ -171,7 +168,7 @@ async function loadBudgets() {
   try {
     budgets.value = await budgetsApi.list(form.year, form.month)
   } catch (error) {
-    ElMessage.error('¼ÓÔØÊ§°Ü')
+    ElMessage.error('åŠ è½½å¤±è´¥')
   } finally {
     loading.value = false
   }
@@ -196,7 +193,7 @@ async function handleSubmit() {
     await formRef.value?.validate()
     submitting.value = true
     await budgetsApi.create(form)
-    ElMessage.success('Ìí¼Ó³É¹¦')
+    ElMessage.success('æ·»åŠ æˆåŠŸ')
     showAddDialog.value = false
     loadBudgets()
   } catch (error: any) {
@@ -210,12 +207,12 @@ async function handleSubmit() {
 
 async function handleDelete(id: number) {
   try {
-    await ElMessageBox.confirm('È·¶¨ÒªÉ¾³ıÕâ¸öÔ¤ËãÂğ£¿', 'È·ÈÏ')
+    await ElMessageBox.confirm('ç¡®å®šè¦åˆ é™¤è¿™ä¸ªé¢„ç®—å—ï¼Ÿ', 'ç¡®è®¤')
     await budgetsApi.delete(id)
-    ElMessage.success('ÒÑÉ¾³ı')
+    ElMessage.success('å·²åˆ é™¤')
     loadBudgets()
   } catch (error) {
-    // ÓÃ»§È¡Ïû
+    // ç”¨æˆ·å–æ¶ˆ
   }
 }
 </script>

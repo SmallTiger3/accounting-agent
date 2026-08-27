@@ -9,7 +9,7 @@ from ...schemas.account import AccountCreate, AccountUpdate, AccountResponse
 from ...api.deps import get_current_user
 from ...models.user import User
 
-router = APIRouter(prefix="/accounts", tags=["ÕË»§"])
+router = APIRouter(prefix="/accounts", tags=["è´¦æˆ·"])
 
 
 @router.get("/", response_model=List[AccountResponse])
@@ -17,7 +17,7 @@ async def list_accounts(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """»ñÈ¡ËùÓĞÕË»§"""
+    """è·å–æ‰€æœ‰è´¦æˆ·"""
     result = await db.execute(
         select(Account).where(Account.user_id == current_user.id).order_by(Account.created_at.desc())
     )
@@ -30,7 +30,7 @@ async def create_account(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """´´½¨ÕË»§"""
+    """åˆ›å»ºè´¦æˆ·"""
     account = Account(user_id=current_user.id, **account_data.model_dump())
     db.add(account)
     await db.flush()
@@ -44,7 +44,7 @@ async def get_account(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """»ñÈ¡µ¥¸öÕË»§"""
+    """è·å–å•ä¸ªè´¦æˆ·"""
     result = await db.execute(
         select(Account).where(Account.id == account_id, Account.user_id == current_user.id)
     )
@@ -61,7 +61,7 @@ async def update_account(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """¸üĞÂÕË»§"""
+    """æ›´æ–°è´¦æˆ·"""
     result = await db.execute(
         select(Account).where(Account.id == account_id, Account.user_id == current_user.id)
     )
@@ -84,7 +84,7 @@ async def delete_account(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """É¾³ıÕË»§"""
+    """åˆ é™¤è´¦æˆ·"""
     result = await db.execute(
         select(Account).where(Account.id == account_id, Account.user_id == current_user.id)
     )

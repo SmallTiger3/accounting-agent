@@ -8,7 +8,7 @@ from ...models.category import Category
 from ...api.deps import get_current_user
 from ...models.user import User
 
-router = APIRouter(prefix="/categories", tags=["分类"])
+router = APIRouter(prefix="/categories", tags=["鍒嗙被"])
 
 
 @router.get("/")
@@ -17,7 +17,7 @@ async def list_categories(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """获取分类列表"""
+    """鑾峰彇鍒嗙被鍒楄〃"""
     query = select(Category).where(
         (Category.user_id == current_user.id) | (Category.is_system == True)
     )
