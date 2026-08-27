@@ -1,9 +1,9 @@
-import axios from 'axios'
+﻿import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: '/accounting/api/v1',
   timeout: 60000,
 })
 
@@ -67,3 +67,4 @@ export const chatApi = {
     api.post('/chat/message', { content, session_id: sessionId }),
   deleteSession: (sessionId: number) => api.delete(`/chat/sessions/${sessionId}`),
 }
+
