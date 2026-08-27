@@ -41,3 +41,13 @@ Thumbs.db
 
 # Alembic
 alembic.ini
+
+.env
+
+# Temp files
+start_backend.sh
+transaction_tools.py
+analysis_tools.py
+advice_tools.py
+accounting_agent.py
+accounting-agent.conf
