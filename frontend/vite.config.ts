@@ -21,12 +21,25 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-vue': ['vue', 'vue-router', 'pinia', 'axios', 'dayjs'],
+          'vendor-element': ['element-plus', '@element-plus/icons-vue'],
+          'vendor-charts': ['echarts/core', 'echarts/charts', 'echarts/components', 'echarts/renderers'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
-      '/api': {
+      '/accounting/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/accounting\/api/, '/api'),
       },
     },
   },

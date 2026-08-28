@@ -1,0 +1,249 @@
+/* =========================================================
+   记账Agent 设计系统
+   设计参考：Maybe Finance / Actual Budget 的现代简洁风格
+   ========================================================= */
+
+:root {
+  /* 品牌色（青绿，财务类应用的现代配色） */
+  --app-primary: #10b981;
+  --app-primary-strong: #059669;
+  --app-primary-soft: #ecfdf5;
+
+  /* 语义色 */
+  --app-income: #16a34a;
+  --app-income-soft: #f0fdf4;
+  --app-expense: #ef4444;
+  --app-expense-soft: #fef2f2;
+  --app-warning: #f59e0b;
+  --app-warning-soft: #fffbeb;
+
+  /* 中性色 */
+  --app-bg: #f6f7f9;
+  --app-surface: #ffffff;
+  --app-border: #edf0f3;
+  --app-text: #111827;
+  --app-text-2: #4b5563;
+  --app-text-3: #9ca3af;
+
+  /* 圆角 / 阴影 */
+  --app-radius-lg: 16px;
+  --app-radius: 12px;
+  --app-radius-sm: 8px;
+  --app-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.05);
+  --app-shadow-hover: 0 2px 4px rgba(16, 24, 40, 0.06), 0 14px 36px rgba(16, 24, 40, 0.09);
+
+  /* 布局尺寸 */
+  --topbar-h: 56px;
+  --tabbar-h: 60px;
+
+  /* Element Plus 主题变量覆盖 */
+  --el-color-primary: #10b981;
+  --el-color-primary-light-3: #34d399;
+  --el-color-primary-light-5: #6ee7b7;
+  --el-color-primary-light-7: #a7f3d0;
+  --el-color-primary-light-8: #d1fae5;
+  --el-color-primary-light-9: #ecfdf5;
+  --el-color-primary-dark-2: #059669;
+  --el-border-radius-base: 10px;
+  --el-border-radius-small: 8px;
+  --el-border-color: #e5e7eb;
+  --el-border-color-light: #f3f4f6;
+  --el-border-color-lighter: #f3f4f6;
+  --el-text-color-primary: #111827;
+  --el-text-color-regular: #374151;
+  --el-text-color-secondary: #6b7280;
+  --el-text-color-placeholder: #9ca3af;
+  --el-fill-color-light: #f5f6f8;
+  --el-fill-color-lighter: #fafbfc;
+  --el-bg-color: #ffffff;
+  --el-mask-color: rgba(15, 23, 42, 0.45);
+  --el-box-shadow-light: 0 8px 32px rgba(15, 23, 42, 0.1);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* ---------- 通用组件 ---------- */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.page-header .page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--app-text);
+  line-height: 1.3;
+}
+
+.page-header .page-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--app-text-3);
+}
+
+.app-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.money {
+  font-variant-numeric: tabular-nums;
+}
+
+.money.income {
+  color: var(--app-income);
+}
+
+.money.expense {
+  color: var(--app-expense);
+}
+
+/* ---------- Element Plus 细节微调 ---------- */
+
+.el-card {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.el-card.is-hover-shadow:hover {
+  box-shadow: var(--app-shadow-hover);
+}
+
+.el-button {
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.el-button--large {
+  height: 44px;
+  border-radius: 12px;
+}
+
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner,
+.el-date-editor.el-input__wrapper {
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px var(--el-border-color) inset;
+}
+
+.el-input__wrapper:hover,
+.el-select__wrapper:hover,
+.el-textarea__inner:hover {
+  box-shadow: 0 0 0 1px var(--el-color-primary-light-7) inset;
+}
+
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused,
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 0 3px var(--el-color-primary-light-8);
+}
+
+.el-tabs__nav-wrap::after {
+  height: 1px;
+  background-color: var(--app-border);
+}
+
+.el-tabs__item {
+  font-weight: 600;
+}
+
+.el-tag {
+  border-radius: 999px;
+  border: none;
+  font-weight: 500;
+}
+
+.el-dialog.app-dialog {
+  border-radius: var(--app-radius-lg);
+}
+
+.el-dialog__header {
+  padding: 20px 24px 12px;
+}
+
+.el-dialog__body {
+  padding: 12px 24px 8px;
+}
+
+.el-dialog__footer {
+  padding: 12px 24px 20px;
+}
+
+.el-drawer.app-drawer {
+  border-radius: 0 20px 20px 0;
+}
+
+.el-message {
+  border-radius: 12px;
+  border: none;
+  box-shadow: var(--app-shadow-hover);
+}
+
+.el-message-box {
+  border-radius: var(--app-radius-lg);
+  border: none;
+  box-shadow: var(--app-shadow-hover);
+}
+
+.el-pagination {
+  --el-pagination-button-bg-color: var(--app-surface);
+}
+
+.el-pagination.is-background .el-pager li,
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .btn-next {
+  border-radius: 8px;
+}
+
+.el-progress-bar__outer {
+  border-radius: 999px;
+}
+
+.el-progress-bar__inner {
+  border-radius: 999px;
+}
+
+/* ---------- 移动端对话框：全屏抽屉式 ---------- */
+@media (max-width: 767px) {
+  .el-dialog.app-dialog {
+    width: 100% !important;
+    height: 92dvh;
+    margin: 0 !important;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: absolute;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .el-dialog.app-dialog .el-dialog__body {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
