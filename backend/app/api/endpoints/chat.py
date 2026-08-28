@@ -120,12 +120,17 @@ async def send_message(
         for msg in history_result.scalars().all()
     ]
     
-    response = await agent.chat(
-        db=db,
-        user_id=current_user.id,
-        message=message_data.content,
-        chat_history=history[:-1],
-    )
+    try:
+        response = await agent.chat(
+            db=db,
+            user_id=current_user.id,
+            message=message_data.content,
+            chat_history=history[:-1],
+        )
+    except Exception:
+        # LLM 或工具调用异常（如模型超时/限流），回滚本次事务并返回友好提示
+        await db.rollback()
+        raise HTTPException(status_code=502, detail="AI 服务暂时不可用，请稍后重试")
     
     ai_msg = ChatMessage(
         session_id=session.id,
