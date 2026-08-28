@@ -1,6 +1,6 @@
 import json
 from typing import Optional, List
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .llm_factory import create_llm
@@ -73,10 +73,13 @@ class AccountingAgent:
         
         tool_results = []
         if hasattr(response, 'tool_calls') and response.tool_calls:
+            messages.append(response)
             for tool_call in response.tool_calls:
                 tool_name = tool_call["name"]
                 tool_args = tool_call["args"]
+                tool_call_id = tool_call["id"]
                 
+                matched = False
                 for tool in self.tools:
                     if tool.name == tool_name:
                         result = await tool.ainvoke(tool_args)
@@ -84,12 +87,13 @@ class AccountingAgent:
                             "tool": tool_name,
                             "result": json.loads(result) if isinstance(result, str) else result,
                         })
+                        messages.append(ToolMessage(content=result, tool_call_id=tool_call_id))
+                        matched = True
                         break
-            
-            messages.append(response)
-            for tr in tool_results:
-                tool_msg = f"工具 {tr['tool']} 的结果：{json.dumps(tr['result'], ensure_ascii=False)}"
-                messages.append(SystemMessage(content=tool_msg))
+                if not matched:
+                    messages.append(
+                        ToolMessage(content=f"未找到工具：{tool_name}", tool_call_id=tool_call_id)
+                    )
             
             response = await self.llm_with_tools.ainvoke(messages)
         
