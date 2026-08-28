@@ -6,6 +6,7 @@ from ...db.session import get_db
 from ...models.user import User
 from ...schemas.user import UserCreate, UserLogin, UserResponse, Token
 from ...core.security import get_password_hash, verify_password, create_access_token
+from ...api.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["认证"])
 
@@ -47,3 +48,8 @@ async def login(login_data: UserLogin, db: AsyncSession = Depends(get_db)):
     
     access_token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_me(current_user: User = Depends(get_current_user)):
+    return current_user

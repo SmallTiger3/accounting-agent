@@ -11,6 +11,7 @@ from ...models.category import Category
 from ...schemas.budget import BudgetCreate
 from ...api.deps import get_current_user
 from ...models.user import User
+from ...services.budget_periods import get_period_bounds, clamp_period_to_today
 
 router = APIRouter(prefix="/budgets", tags=["预算"])
 
@@ -27,24 +28,28 @@ async def list_budgets(
     year = year or today.year
     month = month or today.month
     
-    result = await db.execute(
-        select(Budget).where(
-            Budget.user_id == current_user.id,
-            Budget.year == year,
-            (Budget.month == month) | (Budget.month.is_(None)),
-        )
-    )
+    result = await db.execute(select(Budget).where(
+        Budget.user_id == current_user.id,
+        Budget.year == year,
+        ((Budget.period == "yearly") |
+         ((Budget.period.in_(["monthly", "weekly"])) &
+          ((Budget.month == month) | (Budget.month.is_(None))))),
+    ))
     budgets = result.scalars().all()
     
     budget_list = []
-    start_date = date(year, month, 1)
-    
+    period_reference = today if (year, month) == (today.year, today.month) else date(year, month, 1)
     for budget in budgets:
+        start_date, end_date = get_period_bounds(
+            budget.period, year, budget.month or month, period_reference
+        )
+        if (year, month) == (today.year, today.month):
+            start_date, end_date = clamp_period_to_today(start_date, end_date, today)
         query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
             Transaction.user_id == current_user.id,
             Transaction.transaction_type == "expense",
             Transaction.transaction_date >= start_date,
-            Transaction.transaction_date <= today,
+            Transaction.transaction_date <= end_date,
         )
         if budget.category_id:
             query = query.where(Transaction.category_id == budget.category_id)

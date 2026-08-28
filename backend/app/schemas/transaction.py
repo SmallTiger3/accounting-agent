@@ -6,7 +6,8 @@ from typing import Optional, List
 
 class TransactionCreate(BaseModel):
     account_id: int
-    category_id: int
+    transfer_account_id: Optional[int] = None
+    category_id: Optional[int] = None
     amount: Decimal = Field(..., gt=0, decimal_places=2)
     transaction_type: str = Field(..., pattern="^(income|expense|transfer)$")
     description: Optional[str] = None
@@ -16,6 +17,7 @@ class TransactionCreate(BaseModel):
 
 class TransactionUpdate(BaseModel):
     account_id: Optional[int] = None
+    transfer_account_id: Optional[int] = None
     category_id: Optional[int] = None
     amount: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
     transaction_type: Optional[str] = Field(None, pattern="^(income|expense|transfer)$")
@@ -27,6 +29,7 @@ class TransactionUpdate(BaseModel):
 class TransactionResponse(BaseModel):
     id: int
     account_id: int
+    transfer_account_id: Optional[int] = None
     category_id: int
     amount: Decimal
     transaction_type: str
@@ -36,6 +39,7 @@ class TransactionResponse(BaseModel):
     created_at: datetime
     # Joined fields
     account_name: Optional[str] = None
+    transfer_account_name: Optional[str] = None
     category_name: Optional[str] = None
 
     class Config:

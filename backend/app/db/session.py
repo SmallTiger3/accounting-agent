@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import text
 from ..core.config import settings
 
 # 将 postgresql:// 转换为 postgresql+asyncpg://
@@ -28,3 +29,8 @@ async def get_db():
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        if database_url.startswith("postgresql+"):
+            await conn.execute(text(
+                "ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "
+                "transfer_account_id INTEGER REFERENCES accounts(id)"
+            ))

@@ -20,4 +20,14 @@ class Account(Base):
 
     # Relationships
     user = relationship("User", back_populates="accounts")
-    transactions = relationship("Transaction", back_populates="account", cascade="all, delete-orphan")
+    transactions = relationship(
+        "Transaction",
+        back_populates="account",
+        foreign_keys="Transaction.account_id",
+        cascade="all, delete-orphan",
+    )
+    transfer_transactions = relationship(
+        "Transaction",
+        back_populates="transfer_account",
+        foreign_keys="Transaction.transfer_account_id",
+    )

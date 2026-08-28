@@ -107,6 +107,7 @@ function handleLogout() {
 }
 
 onMounted(() => {
+  authStore.loadUser().catch(() => {})
   // 预加载其余页面模块，切换菜单时无需等待下载
   import('@/views/Transactions.vue')
   import('@/views/Accounts.vue')

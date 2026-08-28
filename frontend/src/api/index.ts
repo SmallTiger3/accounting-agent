@@ -34,6 +34,7 @@ export const authApi = {
     api.post('/auth/login', { username, password }),
   register: (username: string, email: string, password: string) =>
     api.post('/auth/register', { username, email, password }),
+  me: () => api.get('/auth/me'),
 }
 
 export const accountsApi = {

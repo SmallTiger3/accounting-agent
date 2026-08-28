@@ -82,13 +82,13 @@
         <div v-for="txn in recentTransactions" :key="txn.id" class="recent-item">
           <div class="txn-icon" :class="txn.transaction_type">
             <el-icon :size="16">
-              <component :is="txn.transaction_type === 'income' ? 'Top' : 'Bottom'" />
+              <component :is="transactionIcon(txn.transaction_type)" />
             </el-icon>
           </div>
           <div class="txn-main">
             <div class="txn-desc">{{ txn.description || txn.category_name || '未分类' }}</div>
             <div class="txn-meta">
-              {{ txn.category_name }} · {{ txn.account_name }} · {{ txn.transaction_date }}
+              {{ txn.category_name }} · {{ txn.account_name }}<template v-if="txn.transfer_account_name"> -> {{ txn.transfer_account_name }}</template> · {{ txn.transaction_date }}
             </div>
           </div>
           <div class="money txn-amount" :class="txn.transaction_type">
@@ -179,7 +179,7 @@ async function loadData() {
     const catMap = new Map<string, number>()
     items.forEach((t: any) => {
       if (t.transaction_type === 'income') stats.totalIncome += t.amount
-      else {
+      else if (t.transaction_type === 'expense') {
         stats.totalExpense += t.amount
         const name = t.category_name || '未分类'
         catMap.set(name, (catMap.get(name) || 0) + t.amount)
@@ -215,7 +215,7 @@ function buildTrend(items: any[]) {
   items.forEach((t: any) => {
     const entry = dateMap.get(t.transaction_date) || { income: 0, expense: 0 }
     if (t.transaction_type === 'income') entry.income += t.amount
-    else entry.expense += t.amount
+    else if (t.transaction_type === 'expense') entry.expense += t.amount
     dateMap.set(t.transaction_date, entry)
   })
 
@@ -228,6 +228,10 @@ function buildTrend(items: any[]) {
   }
 
   return { days, income, expense }
+}
+
+function transactionIcon(type: string) {
+  return type === 'income' ? 'Top' : type === 'transfer' ? 'Switch' : 'Bottom'
 }
 
 function initCharts() {

@@ -18,6 +18,7 @@
           <el-select v-model="filters.transaction_type" clearable placeholder="全部" style="width: 110px">
             <el-option label="收入" value="income" />
             <el-option label="支出" value="expense" />
+            <el-option label="转账" value="transfer" />
           </el-select>
         </el-form-item>
         <el-form-item label="日期">
@@ -53,8 +54,8 @@
         <el-table-column prop="transaction_date" label="日期" width="120" />
         <el-table-column prop="transaction_type" label="类型" width="90">
           <template #default="{ row }">
-            <el-tag :type="row.transaction_type === 'income' ? 'success' : 'danger'" size="small">
-              {{ row.transaction_type === 'income' ? '收入' : '支出' }}
+            <el-tag :type="typeTag(row.transaction_type)" size="small">
+              {{ typeLabel(row.transaction_type) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -68,6 +69,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="account_name" label="账户" width="120" />
+        <el-table-column prop="transfer_account_name" label="转入账户" width="120">
+          <template #default="{ row }">
+            <span>{{ row.transfer_account_name || '-' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="80" align="center">
           <template #default="{ row }">
             <el-button type="danger" size="small" link @click="handleDelete(row.id)">删除</el-button>
@@ -95,7 +101,7 @@
         <div v-for="txn in transactions" :key="txn.id" class="app-card txn-card">
           <div class="txn-icon" :class="txn.transaction_type">
             <el-icon :size="17">
-              <component :is="txn.transaction_type === 'income' ? 'Top' : 'Bottom'" />
+              <component :is="transactionIcon(txn.transaction_type)" />
             </el-icon>
           </div>
           <div class="txn-main">
@@ -104,6 +110,7 @@
               <span class="cat-chip">{{ txn.category_name }}</span>
               <span>{{ txn.transaction_date }}</span>
               <span>{{ txn.account_name }}</span>
+              <span v-if="txn.transfer_account_name">-> {{ txn.transfer_account_name }}</span>
             </div>
           </div>
           <div class="txn-right">
@@ -151,6 +158,15 @@
       <el-form :model="addForm" :rules="addRules" ref="addFormRef" label-position="top">
         <div class="type-switch">
           <button
+            type="button"
+            :class="['type-btn', 'transfer', { active: addForm.transaction_type === 'transfer' }]"
+            @click="addForm.transaction_type = 'transfer'"
+          >
+            <el-icon :size="18"><Switch /></el-icon>
+            转账
+          </button>
+          <button
+            type="button"
             :class="['type-btn', 'expense', { active: addForm.transaction_type === 'expense' }]"
             @click="addForm.transaction_type = 'expense'"
           >
@@ -158,6 +174,7 @@
             支出
           </button>
           <button
+            type="button"
             :class="['type-btn', 'income', { active: addForm.transaction_type === 'income' }]"
             @click="addForm.transaction_type = 'income'"
           >
@@ -180,8 +197,21 @@
           </div>
         </el-form-item>
 
+        <div v-if="addForm.transaction_type === 'transfer'" class="transfer-account-field">
+          <el-form-item prop="transfer_account_id" label="Transfer to">
+            <el-select v-model="addForm.transfer_account_id" placeholder="Select destination account" style="width: 100%">
+              <el-option
+                v-for="acc in accounts.filter((item) => item.id !== addForm.account_id)"
+                :key="acc.id"
+                :label="acc.name"
+                :value="acc.id"
+              />
+            </el-select>
+          </el-form-item>
+        </div>
+
         <div class="form-grid">
-          <el-form-item prop="category_id" label="分类">
+          <el-form-item v-if="addForm.transaction_type !== 'transfer'" prop="category_id" label="分类">
             <el-select v-model="addForm.category_id" placeholder="选择分类" style="width: 100%">
               <el-option
                 v-for="cat in filteredCategories"
@@ -257,12 +287,14 @@ const addForm = reactive({
   transaction_type: 'expense',
   amount: 0,
   category_id: null,
+  transfer_account_id: null,
   account_id: null,
   transaction_date: new Date().toISOString().split('T')[0],
   description: '',
 })
 
 const addRules = {
+  transfer_account_id: [{ required: true, message: 'Select destination account', trigger: 'change' }],
   amount: [
     { required: true, message: '请输入金额', trigger: 'blur' },
     {
@@ -281,6 +313,18 @@ const addRules = {
 const filteredCategories = computed(() => {
   return categories.value.filter((c) => c.category_type === addForm.transaction_type)
 })
+
+function typeLabel(type: string) {
+  return type === 'income' ? '收入' : type === 'transfer' ? '转账' : '支出'
+}
+
+function typeTag(type: string) {
+  return type === 'income' ? 'success' : type === 'transfer' ? 'warning' : 'danger'
+}
+
+function transactionIcon(type: string) {
+  return type === 'income' ? 'Top' : type === 'transfer' ? 'Switch' : 'Bottom'
+}
 
 onMounted(() => {
   loadTransactions()
@@ -340,6 +384,8 @@ function handleSizeChange() {
 
 function openAdd() {
   addForm.amount = 0
+  addForm.category_id = null
+  addForm.transfer_account_id = null
   amountText.value = ''
   addForm.description = ''
   showAddDialog.value = true
@@ -356,7 +402,11 @@ function handleAmountInput(value: string) {
 
 async function handleAdd() {
   try {
-    await addFormRef.value?.validate()
+    if (addForm.transaction_type === 'transfer') {
+      await addFormRef.value?.validateField(['amount', 'account_id', 'transfer_account_id', 'transaction_date'])
+    } else {
+      await addFormRef.value?.validate()
+    }
     adding.value = true
     await transactionsApi.create(addForm)
     ElMessage.success('添加成功')
@@ -460,6 +510,11 @@ async function handleDelete(id: number) {
 .txn-icon.expense {
   background: var(--app-expense-soft);
   color: var(--app-expense);
+}
+
+.txn-icon.transfer {
+  background: var(--app-warning-soft);
+  color: var(--app-warning);
 }
 
 .txn-main {
@@ -574,6 +629,12 @@ async function handleDelete(id: number) {
   border-color: var(--app-expense);
   background: var(--app-expense-soft);
   color: var(--app-expense);
+}
+
+.type-btn.transfer.active {
+  border-color: var(--app-warning);
+  background: var(--app-warning-soft);
+  color: #b45309;
 }
 
 .type-btn.income.active {

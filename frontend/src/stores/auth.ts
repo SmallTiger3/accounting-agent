@@ -12,7 +12,19 @@ export const useAuthStore = defineStore('auth', () => {
     const data: any = await authApi.login(username, password)
     token.value = data.access_token
     localStorage.setItem('token', data.access_token)
+    await loadUser()
     return data
+  }
+
+  async function loadUser() {
+    if (!token.value) return null
+    try {
+      user.value = await authApi.me()
+      return user.value
+    } catch (error) {
+      logout()
+      throw error
+    }
   }
 
   async function register(username: string, email: string, password: string) {
@@ -32,5 +44,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
+    loadUser,
   }
 })

@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ...models.transaction import Transaction
 from ...models.category import Category
 from ...models.budget import Budget
+from ...services.budget_periods import get_period_bounds, clamp_period_to_today
 
 _db_var: ContextVar[Optional[AsyncSession]] = ContextVar("analysis_db", default=None)
 _user_id_var: ContextVar[Optional[int]] = ContextVar("analysis_user_id", default=None)
@@ -135,13 +136,13 @@ async def check_budget(
         today = date.today()
         year = today.year
         month = today.month
-        start_date = today.replace(day=1)
-        
         result = await db.execute(
             select(Budget).where(
                 Budget.user_id == user_id,
                 Budget.year == year,
-                (Budget.month == month) | (Budget.month.is_(None))
+                ((Budget.period == "yearly") |
+                 ((Budget.period.in_(["monthly", "weekly"])) &
+                  ((Budget.month == month) | (Budget.month.is_(None)))))
             )
         )
         budgets = result.scalars().all()
@@ -150,11 +151,13 @@ async def check_budget(
         budget_status = []
         
         for budget in budgets:
+            start_date, end_date = get_period_bounds(budget.period, year, budget.month or month, today)
+            start_date, end_date = clamp_period_to_today(start_date, end_date, today)
             query = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
                 Transaction.user_id == user_id,
                 Transaction.transaction_type == "expense",
                 Transaction.transaction_date >= start_date,
-                Transaction.transaction_date <= today,
+                Transaction.transaction_date <= end_date,
             )
             
             if budget.category_id:

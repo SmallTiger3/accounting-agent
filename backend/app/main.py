@@ -55,6 +55,7 @@ async def seed_default_categories():
         ("工资", "income"), ("奖金", "income"), ("投资收益", "income"),
         ("兼职", "income"), ("红包", "income"), ("其他收入", "income"),
     ]
+    default_categories.append(("转账", "transfer"))
     
     async with async_session() as session:
         for name, cat_type in default_categories:

@@ -8,7 +8,7 @@ export function formatMoney(value: number | string | null | undefined): string {
 }
 
 export function formatSignedMoney(value: number | string | null | undefined, type: string): string {
-  const sign = type === 'income' ? '+' : '-'
+  const sign = type === 'income' ? '+' : type === 'transfer' ? '' : '-'
   return `${sign}${formatMoney(value)}`
 }
 
