@@ -318,11 +318,13 @@ async function handleDelete(id: number) {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  min-width: 0;
 }
 
 .overview-card {
   padding: 16px 14px;
   text-align: center;
+  min-width: 0;
 }
 
 .overview-label {
@@ -347,6 +349,7 @@ async function handleDelete(id: number) {
 
 .month-picker :deep(.el-date-editor) {
   width: 150px;
+  max-width: 100%;
 }
 
 /* 桌面表格 */
@@ -391,6 +394,7 @@ async function handleDelete(id: number) {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 .budget-card {
@@ -401,7 +405,9 @@ async function handleDelete(id: number) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .budget-cat {
@@ -411,6 +417,13 @@ async function handleDelete(id: number) {
   font-size: 14px;
   font-weight: 700;
   color: var(--app-text);
+  min-width: 0;
+}
+
+.budget-cat span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cat-dot {
@@ -457,6 +470,7 @@ async function handleDelete(id: number) {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
 }
 
 .stat-label {
@@ -467,6 +481,9 @@ async function handleDelete(id: number) {
 .budget-stats .money {
   font-size: 13px;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mobile-empty {
@@ -527,6 +544,30 @@ async function handleDelete(id: number) {
 }
 
 @media (max-width: 767px) {
+  .overview-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .month-picker {
+    justify-content: stretch;
+  }
+
+  .month-picker :deep(.el-date-editor) {
+    width: 100%;
+  }
+
+  .budget-card {
+    padding: 14px;
+  }
+
+  .budget-stats {
+    flex-wrap: wrap;
+  }
+
+  .budget-stats > div {
+    flex: 1 1 30%;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
     gap: 0;

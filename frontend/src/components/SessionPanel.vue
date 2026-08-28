@@ -59,14 +59,18 @@ defineEmits<{
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
+  width: 100%;
 }
 
 .panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   padding: 16px;
   border-bottom: 1px solid var(--app-border);
+  flex-shrink: 0;
 }
 
 .panel-title {
@@ -76,10 +80,12 @@ defineEmits<{
   font-size: 14px;
   font-weight: 700;
   color: var(--app-text);
+  min-width: 0;
 }
 
 .session-list {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 10px;
 }
@@ -93,6 +99,7 @@ defineEmits<{
   cursor: pointer;
   margin-bottom: 4px;
   transition: background 0.15s ease;
+  min-width: 0;
 }
 
 .session-item:hover {

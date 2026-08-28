@@ -119,8 +119,10 @@ onMounted(() => {
 <style scoped>
 .app-shell {
   height: 100dvh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* ============ 桌面端侧边栏 ============ */
@@ -139,6 +141,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   padding: 0 8px;
+  min-width: 0;
 }
 
 .brand.compact {
@@ -162,7 +165,10 @@ onMounted(() => {
   font-size: 17px;
   font-weight: 700;
   color: var(--app-text);
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav {
@@ -265,6 +271,8 @@ onMounted(() => {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--app-border);
+  position: relative;
+  z-index: 10;
 }
 
 .topbar-user {
@@ -283,12 +291,15 @@ onMounted(() => {
 
 .content {
   flex: 1;
+  width: 100%;
   min-height: 0;
+  min-width: 0;
   overflow-y: auto;
   padding: 28px;
 }
 
 .content > :deep(*) {
+  width: 100%;
   max-width: 1160px;
   margin-left: auto;
   margin-right: auto;
@@ -308,6 +319,8 @@ onMounted(() => {
   border-top: 1px solid var(--app-border);
   display: none;
   padding-bottom: env(safe-area-inset-bottom);
+  position: relative;
+  z-index: 10;
 }
 
 .tab-item {
@@ -354,8 +367,27 @@ onMounted(() => {
     display: flex;
   }
 
+  .content {
+    padding: 18px 14px calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .content.is-chat {
+    padding: 0;
+  }
+
   .bottom-nav {
     display: flex;
+  }
+}
+
+@media (max-width: 374px) {
+  .topbar {
+    padding: 0 12px;
+  }
+
+  .content {
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }
 </style>

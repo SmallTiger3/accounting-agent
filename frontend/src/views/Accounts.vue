@@ -253,6 +253,7 @@ function handleCommand(command: string, account: any) {
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
+  min-width: 0;
 }
 
 .summary-label {
@@ -263,7 +264,10 @@ function handleCommand(command: string, account: any) {
 .summary-value {
   font-size: 30px;
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .summary-types {
@@ -278,11 +282,15 @@ function handleCommand(command: string, account: any) {
   gap: 6px;
   font-size: 12px;
   color: var(--app-text-3);
+  min-width: 0;
 }
 
 .summary-type b {
   font-size: 13px;
   color: var(--app-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dot {
@@ -299,12 +307,14 @@ function handleCommand(command: string, account: any) {
 
 .account-card {
   padding: 18px;
+  min-width: 0;
 }
 
 .account-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   margin-bottom: 14px;
 }
 
@@ -340,6 +350,9 @@ function handleCommand(command: string, account: any) {
   font-size: 16px;
   font-weight: 700;
   color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .account-type {
@@ -352,6 +365,9 @@ function handleCommand(command: string, account: any) {
   margin-top: 12px;
   font-size: 24px;
   font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .account-desc {
@@ -383,6 +399,7 @@ function handleCommand(command: string, account: any) {
   color: var(--app-text-2);
   cursor: pointer;
   transition: all 0.15s ease;
+  min-width: 0;
 }
 
 .type-option.active {
@@ -417,6 +434,31 @@ function handleCommand(command: string, account: any) {
 
   .summary-value {
     font-size: 34px;
+  }
+}
+
+@media (max-width: 767px) {
+  .summary-card {
+    padding: 18px 16px;
+  }
+
+  .summary-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .summary-value {
+    width: 100%;
+    font-size: 27px;
+  }
+
+  .summary-types {
+    gap: 8px 14px;
+  }
+
+  .account-card {
+    padding: 16px;
   }
 }
 </style>

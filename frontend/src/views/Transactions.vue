@@ -437,6 +437,7 @@ async function handleDelete(id: number) {
 .filter-card {
   padding: 16px;
   margin-bottom: 16px;
+  overflow: visible;
 }
 
 .filter-form {
@@ -444,6 +445,7 @@ async function handleDelete(id: number) {
   flex-wrap: wrap;
   gap: 4px;
   align-items: flex-end;
+  min-width: 0;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -452,10 +454,12 @@ async function handleDelete(id: number) {
 
 .date-picker {
   width: 260px;
+  max-width: 100%;
 }
 
 .keyword-input {
   width: 180px;
+  max-width: 100%;
 }
 
 .table-card {
@@ -483,13 +487,15 @@ async function handleDelete(id: number) {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 .txn-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 14px;
+  min-width: 0;
 }
 
 .txn-icon {
@@ -520,6 +526,7 @@ async function handleDelete(id: number) {
 .txn-main {
   flex: 1;
   min-width: 0;
+  padding-top: 1px;
 }
 
 .txn-desc {
@@ -535,11 +542,12 @@ async function handleDelete(id: number) {
   margin-top: 5px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   font-size: 12px;
   color: var(--app-text-3);
+  line-height: 1.5;
   overflow: hidden;
-  white-space: nowrap;
 }
 
 .cat-chip {
@@ -556,11 +564,17 @@ async function handleDelete(id: number) {
   align-items: flex-end;
   gap: 6px;
   flex-shrink: 0;
+  max-width: 42%;
+  min-width: 72px;
 }
 
 .txn-amount {
   font-size: 15px;
   font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .txn-delete {
@@ -599,6 +613,7 @@ async function handleDelete(id: number) {
   padding: 8px 0 4px;
   font-size: 13px;
   color: var(--app-text-2);
+  flex-wrap: wrap;
 }
 
 /* ============ 记一笔弹窗 ============ */
@@ -606,6 +621,7 @@ async function handleDelete(id: number) {
   display: flex;
   gap: 10px;
   margin-bottom: 18px;
+  min-width: 0;
 }
 
 .type-btn {
@@ -623,6 +639,7 @@ async function handleDelete(id: number) {
   color: var(--app-text-2);
   cursor: pointer;
   transition: all 0.15s ease;
+  min-width: 0;
 }
 
 .type-btn.expense.active {
@@ -652,6 +669,7 @@ async function handleDelete(id: number) {
   border: 1px solid var(--app-border);
   border-radius: 12px;
   padding: 6px 14px;
+  min-width: 0;
 }
 
 .amount-prefix {
@@ -663,6 +681,7 @@ async function handleDelete(id: number) {
 .amount-input :deep(.el-input__wrapper) {
   background: transparent;
   box-shadow: none !important;
+  min-width: 0;
 }
 
 .amount-input :deep(.el-input__inner) {
@@ -685,11 +704,13 @@ async function handleDelete(id: number) {
 @media (max-width: 1023.98px) {
   .filter-card {
     padding: 14px;
+    margin-bottom: 12px;
   }
 
   .filter-form {
     flex-direction: column;
     align-items: stretch;
+    gap: 0;
   }
 
   .filter-form :deep(.el-form-item) {
@@ -697,16 +718,64 @@ async function handleDelete(id: number) {
     flex-direction: column;
     align-items: stretch;
     margin-bottom: 10px;
+    margin-right: 0;
+    width: 100%;
+    min-width: 0;
   }
 
   .filter-form :deep(.el-form-item__label) {
     justify-content: flex-start;
     padding-bottom: 4px;
+    height: auto;
+    line-height: 1.4;
+  }
+
+  .filter-form :deep(.el-form-item__content) {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filter-form :deep(.el-select),
+  .filter-form :deep(.el-input),
+  .filter-form :deep(.el-date-editor.el-input__wrapper) {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .date-picker,
   .keyword-input {
     width: 100%;
+  }
+
+  .txn-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .txn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+
+  .txn-desc {
+    font-size: 14px;
+  }
+
+  .txn-meta {
+    gap: 5px 7px;
+  }
+
+  .cat-chip {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .txn-right {
+    min-width: 68px;
+    max-width: 38%;
   }
 
   .form-grid {
@@ -716,6 +785,54 @@ async function handleDelete(id: number) {
 
   .form-grid :deep(.el-form-item:last-child) {
     grid-column: auto;
+  }
+}
+
+@media (max-width: 374px) {
+  .filter-card {
+    padding: 12px;
+  }
+
+  .txn-card {
+    gap: 8px;
+    padding: 11px 10px;
+  }
+
+  .txn-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .txn-right {
+    min-width: 62px;
+    max-width: 36%;
+  }
+
+  .txn-amount {
+    font-size: 14px;
+  }
+
+  .txn-delete {
+    width: 28px;
+    height: 28px;
+  }
+
+  .type-switch {
+    gap: 6px;
+  }
+
+  .type-btn {
+    height: 42px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .amount-input {
+    padding: 5px 12px;
+  }
+
+  .amount-input :deep(.el-input__inner) {
+    font-size: 23px;
   }
 }
 </style>

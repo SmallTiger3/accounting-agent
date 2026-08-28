@@ -365,6 +365,7 @@ function handleResize() {
   align-items: center;
   gap: 14px;
   padding: 18px 16px;
+  min-width: 0;
 }
 
 .stat-icon {
@@ -410,19 +411,23 @@ function handleResize() {
 
 .chart-card {
   padding: 18px 16px;
+  min-width: 0;
 }
 
 .chart-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .chart-title {
   font-size: 15px;
   font-weight: 700;
   color: var(--app-text);
+  min-width: 0;
 }
 
 .chart-sub {
@@ -469,6 +474,7 @@ function handleResize() {
   gap: 12px;
   padding: 12px 4px;
   border-bottom: 1px solid var(--app-border);
+  min-width: 0;
 }
 
 .recent-item:last-child {
@@ -522,6 +528,10 @@ function handleResize() {
   font-size: 15px;
   font-weight: 700;
   flex-shrink: 0;
+  max-width: 36%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .recent-empty {
@@ -559,6 +569,28 @@ function handleResize() {
 
   .stat-value {
     font-size: 22px;
+  }
+}
+
+@media (max-width: 374px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card,
+  .chart-card,
+  .recent-card {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .recent-item {
+    gap: 9px;
+  }
+
+  .txn-amount {
+    max-width: 32%;
+    font-size: 14px;
   }
 }
 </style>

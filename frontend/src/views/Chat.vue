@@ -274,6 +274,8 @@ function formatTime(time: string) {
 .chat-page {
   display: flex;
   height: 100%;
+  min-height: 0;
+  width: 100%;
   background: var(--app-surface);
   overflow: hidden;
 }
@@ -296,6 +298,7 @@ function formatTime(time: string) {
 .chat-main {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -322,6 +325,12 @@ function formatTime(time: string) {
   white-space: nowrap;
 }
 
+.chat-title span:first-child {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .chat-sub {
   display: block;
   font-size: 11px;
@@ -332,6 +341,7 @@ function formatTime(time: string) {
 
 .icon-btn {
   width: 36px;
+  min-width: 36px;
   height: 36px;
   border: none;
   background: #f5f6f8;
@@ -351,20 +361,23 @@ function formatTime(time: string) {
 
 .messages {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 20px 16px;
   scroll-behavior: smooth;
+  overscroll-behavior: contain;
 }
 
 /* ============ 空状态 ============ */
 .empty-state {
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: var(--app-text-3);
+  padding: 24px 0;
 }
 
 .empty-logo {
@@ -397,6 +410,7 @@ function formatTime(time: string) {
   gap: 10px;
   margin-top: 24px;
   max-width: 480px;
+  width: 100%;
 }
 
 .prompt-chip {
@@ -408,6 +422,8 @@ function formatTime(time: string) {
   color: var(--app-text-2);
   cursor: pointer;
   transition: all 0.15s ease;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .prompt-chip:hover {
@@ -421,6 +437,7 @@ function formatTime(time: string) {
   display: flex;
   gap: 10px;
   margin-bottom: 18px;
+  min-width: 0;
 }
 
 .message.user {
@@ -466,6 +483,7 @@ function formatTime(time: string) {
   font-size: 14px;
   line-height: 1.65;
   word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .user-text {
@@ -479,6 +497,7 @@ function formatTime(time: string) {
   background: #f5f6f8;
   color: var(--app-text);
   border-top-left-radius: 4px;
+  max-width: 100%;
 }
 
 .message-time {
@@ -532,6 +551,7 @@ function formatTime(time: string) {
   border-radius: 10px;
   overflow-x: auto;
   margin: 8px 0;
+  max-width: 100%;
 }
 
 .markdown-body :deep(pre code) {
@@ -553,6 +573,8 @@ function formatTime(time: string) {
   border-collapse: collapse;
   margin: 8px 0;
   width: 100%;
+  display: block;
+  overflow-x: auto;
   font-size: 13px;
 }
 
@@ -600,12 +622,14 @@ function formatTime(time: string) {
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--app-border);
   flex-shrink: 0;
+  background: var(--app-surface);
 }
 
 .input-box {
   display: flex;
   align-items: flex-end;
   gap: 8px;
+  min-width: 0;
   background: #f5f6f8;
   border: 1px solid transparent;
   border-radius: 14px;
@@ -627,6 +651,11 @@ function formatTime(time: string) {
   min-height: 28px;
   font-size: 14px;
   resize: none;
+}
+
+.input-box :deep(.el-textarea) {
+  flex: 1;
+  min-width: 0;
 }
 
 .send-btn {
@@ -666,6 +695,83 @@ function formatTime(time: string) {
 
   .message-body {
     max-width: 68%;
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .chat-page {
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .chat-header {
+    padding: 10px 12px;
+  }
+
+  .messages {
+    padding: 16px 12px;
+  }
+
+  .message-body {
+    max-width: calc(100% - 54px);
+  }
+
+  .message-text {
+    padding: 10px 13px;
+  }
+
+  .empty-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    margin-bottom: 14px;
+  }
+
+  .empty-state h3 {
+    font-size: 16px;
+  }
+
+  .quick-prompts {
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .prompt-chip {
+    padding: 9px 12px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 374px) {
+  .chat-title {
+    font-size: 14px;
+  }
+
+  .chat-sub {
+    display: none;
+  }
+
+  .messages {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .message {
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .message-body {
+    max-width: calc(100% - 44px);
+  }
+
+  .input-area {
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }
 </style>
