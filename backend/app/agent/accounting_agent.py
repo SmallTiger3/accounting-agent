@@ -5,6 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .llm_factory import create_llm
 from .tools import add_transaction, query_transactions, analyze_spending, check_budget, get_spending_insights
+from .tools.transaction_tools import set_db_session as set_txn_db
+from .tools.analysis_tools import set_db_session as set_analysis_db
+from .tools.advice_tools import set_db_session as set_advice_db
 
 
 SYSTEM_PROMPT = """你是一个专业的记账助手，帮助用户管理个人财务。
@@ -49,7 +52,12 @@ class AccountingAgent:
         chat_history: Optional[List[dict]] = None,
     ) -> dict:
         """处理用户消息"""
-        
+
+        # 设置数据库会话到所有tools
+        set_txn_db(db, user_id)
+        set_analysis_db(db, user_id)
+        set_advice_db(db, user_id)
+
         messages = [SystemMessage(content=SYSTEM_PROMPT)]
         
         if chat_history:
@@ -68,8 +76,6 @@ class AccountingAgent:
             for tool_call in response.tool_calls:
                 tool_name = tool_call["name"]
                 tool_args = tool_call["args"]
-                tool_args["db"] = db
-                tool_args["user_id"] = user_id
                 
                 for tool in self.tools:
                     if tool.name == tool_name:

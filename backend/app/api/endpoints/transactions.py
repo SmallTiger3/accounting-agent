@@ -21,11 +21,11 @@ async def list_transactions(
     account_id: Optional[int] = None,
     category_id: Optional[int] = None,
     transaction_type: Optional[str] = None,
-    start_date: Optional[date] = None,
-    end_date: Optional[date] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     keyword: Optional[str] = None,
     page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=20, ge=1, le=100),
+    page_size: int = Query(default=20, ge=1, le=10000),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -42,10 +42,12 @@ async def list_transactions(
         query = query.where(Transaction.category_id == category_id)
     if transaction_type:
         query = query.where(Transaction.transaction_type == transaction_type)
-    if start_date:
-        query = query.where(Transaction.transaction_date >= start_date)
-    if end_date:
-        query = query.where(Transaction.transaction_date <= end_date)
+    start = date.fromisoformat(start_date) if start_date else None
+    end = date.fromisoformat(end_date) if end_date else None
+    if start:
+        query = query.where(Transaction.transaction_date >= start)
+    if end:
+        query = query.where(Transaction.transaction_date <= end)
     if keyword:
         query = query.where(Transaction.description.ilike(f"%{keyword}%"))
     
