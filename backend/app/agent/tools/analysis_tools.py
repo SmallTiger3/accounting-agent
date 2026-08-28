@@ -1,5 +1,7 @@
 import json
+from contextvars import ContextVar
 from datetime import date, timedelta
+from typing import Optional
 from langchain_core.tools import tool
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,11 +10,32 @@ from ...models.transaction import Transaction
 from ...models.category import Category
 from ...models.budget import Budget
 
+_db_var: ContextVar[Optional[AsyncSession]] = ContextVar("analysis_db", default=None)
+_user_id_var: ContextVar[Optional[int]] = ContextVar("analysis_user_id", default=None)
+
+
+def set_db_session(db: AsyncSession, user_id: int) -> None:
+    """设置当前请求的数据库会话和用户ID（供Agent工具使用）。"""
+    _db_var.set(db)
+    _user_id_var.set(user_id)
+
+
+def _get_db() -> AsyncSession:
+    db = _db_var.get()
+    if db is None:
+        raise RuntimeError("数据库会话未初始化，请先调用 set_db_session")
+    return db
+
+
+def _get_user_id() -> int:
+    user_id = _user_id_var.get()
+    if user_id is None:
+        raise RuntimeError("用户未初始化，请先调用 set_db_session")
+    return user_id
+
 
 @tool
 async def analyze_spending(
-    db: AsyncSession,
-    user_id: int,
     period: str = "month",
     start_date: str = None,
     end_date: str = None,
@@ -25,6 +48,9 @@ async def analyze_spending(
         end_date: 自定义结束日期（period=custom时使用）
     """
     try:
+        db = _get_db()
+        user_id = _get_user_id()
+
         today = date.today()
         
         if period == "today":
@@ -100,11 +126,12 @@ async def analyze_spending(
 
 @tool
 async def check_budget(
-    db: AsyncSession,
-    user_id: int,
 ) -> str:
     """检查本月预算使用情况，返回超支预警。"""
     try:
+        db = _get_db()
+        user_id = _get_user_id()
+
         today = date.today()
         year = today.year
         month = today.month

@@ -1,6 +1,8 @@
 import json
+from contextvars import ContextVar
 from datetime import datetime, date
 from decimal import Decimal
+from typing import Optional
 from langchain_core.tools import tool
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,11 +11,32 @@ from ...models.transaction import Transaction
 from ...models.account import Account
 from ...models.category import Category
 
+_db_var: ContextVar[Optional[AsyncSession]] = ContextVar("txn_db", default=None)
+_user_id_var: ContextVar[Optional[int]] = ContextVar("txn_user_id", default=None)
+
+
+def set_db_session(db: AsyncSession, user_id: int) -> None:
+    """设置当前请求的数据库会话和用户ID（供Agent工具使用）。"""
+    _db_var.set(db)
+    _user_id_var.set(user_id)
+
+
+def _get_db() -> AsyncSession:
+    db = _db_var.get()
+    if db is None:
+        raise RuntimeError("数据库会话未初始化，请先调用 set_db_session")
+    return db
+
+
+def _get_user_id() -> int:
+    user_id = _user_id_var.get()
+    if user_id is None:
+        raise RuntimeError("用户未初始化，请先调用 set_db_session")
+    return user_id
+
 
 @tool
 async def add_transaction(
-    db: AsyncSession,
-    user_id: int,
     amount: float,
     transaction_type: str,
     description: str,
@@ -32,6 +55,9 @@ async def add_transaction(
         transaction_date: 交易日期，格式YYYY-MM-DD，默认为今天
     """
     try:
+        db = _get_db()
+        user_id = _get_user_id()
+
         result = await db.execute(
             select(Account).where(Account.user_id == user_id, Account.name.ilike(f"%{account_name}%"))
         )
@@ -98,8 +124,6 @@ async def add_transaction(
 
 @tool
 async def query_transactions(
-    db: AsyncSession,
-    user_id: int,
     start_date: str = None,
     end_date: str = None,
     transaction_type: str = None,
@@ -116,6 +140,9 @@ async def query_transactions(
         limit: 返回数量限制
     """
     try:
+        db = _get_db()
+        user_id = _get_user_id()
+
         query = select(Transaction, Account.name, Category.name).join(
             Account, Transaction.account_id == Account.id
         ).join(
