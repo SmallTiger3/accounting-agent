@@ -150,9 +150,17 @@ async def query_transactions(
         ).where(Transaction.user_id == user_id)
         
         if start_date:
-            query = query.where(Transaction.transaction_date >= start_date)
+            try:
+                start = date.fromisoformat(start_date)
+                query = query.where(Transaction.transaction_date >= start)
+            except ValueError:
+                pass
         if end_date:
-            query = query.where(Transaction.transaction_date <= end_date)
+            try:
+                end = date.fromisoformat(end_date)
+                query = query.where(Transaction.transaction_date <= end)
+            except ValueError:
+                pass
         if transaction_type:
             query = query.where(Transaction.transaction_type == transaction_type)
         if category_name:

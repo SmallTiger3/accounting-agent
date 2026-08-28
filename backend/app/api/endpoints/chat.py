@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import List
@@ -132,7 +133,12 @@ async def send_message(
         content=response["content"],
     )
     db.add(ai_msg)
-    await db.flush()
+    try:
+        await db.flush()
+    except SQLAlchemyError:
+        # 工具调用中的 SQL 错误可能已中止事务，回滚并返回友好提示
+        await db.rollback()
+        raise HTTPException(status_code=502, detail="AI 处理失败，请稍后重试")
     
     if not session.title or session.title == message_data.content[:50]:
         session.title = message_data.content[:50]
