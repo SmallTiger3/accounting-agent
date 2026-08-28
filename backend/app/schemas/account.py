@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from typing import Optional
 
 
@@ -30,3 +30,7 @@ class AccountResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @field_serializer("balance")
+    def serialize_balance(self, value: Decimal) -> float:
+        return float(value)

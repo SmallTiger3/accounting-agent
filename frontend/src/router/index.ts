@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useUiStore } from '@/stores/ui'
+import MainLayout from '@/layouts/MainLayout.vue'
+import Dashboard from '@/views/Dashboard.vue'
 
 const routes = [
   {
@@ -10,13 +13,13 @@ const routes = [
   },
   {
     path: '/',
-    component: () => import('@/layouts/MainLayout.vue'),
+    component: MainLayout,
     meta: { requiresAuth: true },
     children: [
       {
         path: '',
         name: 'Dashboard',
-        component: () => import('@/views/Dashboard.vue'),
+        component: Dashboard,
       },
       {
         path: 'chat',
@@ -47,8 +50,14 @@ const router = createRouter({
   routes,
 })
 
+let navStarted = false
+
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
+  if (!navStarted) {
+    useUiStore().start()
+    navStarted = true
+  }
   
   if (to.meta.requiresAuth !== false && !authStore.isAuthenticated) {
     next('/login')
@@ -56,6 +65,20 @@ router.beforeEach((to, from, next) => {
     next('/')
   } else {
     next()
+  }
+})
+
+router.afterEach(() => {
+  if (navStarted) {
+    useUiStore().stop()
+    navStarted = false
+  }
+})
+
+router.onError(() => {
+  if (navStarted) {
+    useUiStore().stop()
+    navStarted = false
   }
 })
 

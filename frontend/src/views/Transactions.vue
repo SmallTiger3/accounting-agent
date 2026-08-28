@@ -227,7 +227,9 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { transactionsApi, accountsApi, categoriesApi } from '@/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { formatSignedMoney } from '@/utils/format'
+import { useUiStore } from '@/stores/ui'
 
+const uiStore = useUiStore()
 const loading = ref(false)
 const adding = ref(false)
 const showAddDialog = ref(false)
@@ -288,6 +290,7 @@ onMounted(() => {
 
 async function loadTransactions() {
   loading.value = true
+  uiStore.start()
   try {
     const data: any = await transactionsApi.list({
       ...filters,
@@ -300,6 +303,7 @@ async function loadTransactions() {
     ElMessage.error('加载失败')
   } finally {
     loading.value = false
+    uiStore.stop()
   }
 }
 

@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -105,6 +105,14 @@ function handleLogout() {
   authStore.logout()
   router.push('/login')
 }
+
+onMounted(() => {
+  // 预加载其余页面模块，切换菜单时无需等待下载
+  import('@/views/Transactions.vue')
+  import('@/views/Accounts.vue')
+  import('@/views/Budgets.vue')
+  import('@/views/Chat.vue')
+})
 </script>
 
 <style scoped>

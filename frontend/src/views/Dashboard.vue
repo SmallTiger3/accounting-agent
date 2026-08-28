@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard">
+  <div class="dashboard" v-loading="loading">
     <div class="page-header">
       <div>
         <div class="page-title">数据看板</div>
@@ -114,9 +114,12 @@ import { TooltipComponent, LegendComponent, GridComponent } from 'echarts/compon
 import { CanvasRenderer } from 'echarts/renderers'
 import dayjs from 'dayjs'
 import { formatMoney, formatSignedMoney } from '@/utils/format'
+import { useUiStore } from '@/stores/ui'
 
 echarts.use([EChartsPieChart, EChartsLineChart, TooltipComponent, LegendComponent, GridComponent, CanvasRenderer])
 
+const uiStore = useUiStore()
+const loading = ref(false)
 const pieEl = ref<HTMLElement>()
 const lineEl = ref<HTMLElement>()
 let pieChart: echarts.ECharts | null = null
@@ -158,6 +161,8 @@ onBeforeUnmount(() => {
 })
 
 async function loadData() {
+  loading.value = true
+  uiStore.start()
   try {
     const monthStart = dayjs().startOf('month').format('YYYY-MM-DD')
     const weekStart = dayjs().subtract(6, 'day').startOf('day').format('YYYY-MM-DD')
@@ -195,6 +200,9 @@ async function loadData() {
       .slice(0, 6)
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
+  } finally {
+    loading.value = false
+    uiStore.stop()
   }
 }
 

@@ -194,7 +194,9 @@ import { budgetsApi, categoriesApi } from '@/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import { formatMoney } from '@/utils/format'
+import { useUiStore } from '@/stores/ui'
 
+const uiStore = useUiStore()
 const loading = ref(false)
 const submitting = ref(false)
 const showAddDialog = ref(false)
@@ -228,12 +230,14 @@ onMounted(() => {
 
 async function loadBudgets() {
   loading.value = true
+  uiStore.start()
   try {
     budgets.value = await budgetsApi.list(form.year, form.month)
   } catch (error) {
     ElMessage.error('加载失败')
   } finally {
     loading.value = false
+    uiStore.stop()
   }
 }
 

@@ -1,12 +1,13 @@
-export function formatMoney(value: number | null | undefined): string {
-  const n = Number(value || 0)
-  return '¥' + n.toLocaleString('zh-CN', {
+export function formatMoney(value: number | string | null | undefined): string {
+  const n = Number(value)
+  const safe = Number.isFinite(n) ? n : 0
+  return '¥' + safe.toLocaleString('zh-CN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
 }
 
-export function formatSignedMoney(value: number | null | undefined, type: string): string {
+export function formatSignedMoney(value: number | string | null | undefined, type: string): string {
   const sign = type === 'income' ? '+' : '-'
   return `${sign}${formatMoney(value)}`
 }

@@ -29,7 +29,7 @@
     </div>
 
     <!-- 账户卡片 -->
-    <div class="accounts-grid">
+    <div class="accounts-grid" v-loading="loading">
       <div v-for="account in accounts" :key="account.id" class="app-card account-card">
         <div class="account-top">
           <div class="account-icon" :style="{ background: getAccountColor(account.account_type) }">
@@ -110,6 +110,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { formatMoney } from '@/utils/format'
 
 const accounts = ref<any[]>([])
+const loading = ref(false)
 const showAddDialog = ref(false)
 const submitting = ref(false)
 const editingAccount = ref<any>(null)
@@ -135,14 +136,14 @@ const rules = {
 }
 
 const totalAssets = computed(() =>
-  accounts.value.reduce((sum, a) => sum + (a.balance || 0), 0)
+  accounts.value.reduce((sum, a) => sum + Number(a.balance || 0), 0)
 )
 
 const summaryByType = computed(() => {
   return accountTypes.map((t) => {
     const total = accounts.value
       .filter((a) => a.account_type === t.value)
-      .reduce((sum, a) => sum + (a.balance || 0), 0)
+      .reduce((sum, a) => sum + Number(a.balance || 0), 0)
     return { label: t.label, total, color: getAccountColor(t.value) }
   })
 })
@@ -152,10 +153,13 @@ onMounted(() => {
 })
 
 async function loadAccounts() {
+  loading.value = true
   try {
     accounts.value = await accountsApi.list()
   } catch (error) {
     ElMessage.error('加载失败')
+  } finally {
+    loading.value = false
   }
 }
 

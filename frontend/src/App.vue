@@ -1,4 +1,5 @@
 <template>
+  <LoadingBar />
   <router-view v-slot="{ Component }">
     <transition name="page-fade" mode="out-in">
       <component :is="Component" />
@@ -7,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import LoadingBar from '@/components/LoadingBar.vue'
 </script>
 
 <style>
