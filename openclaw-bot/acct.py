@@ -128,12 +128,105 @@ def cmd_delete(user_id, txn_id):
         out({'ok': False, 'error': 'db_error', 'detail': err[:300]})
     out({'ok': True})
 
+def _month_totals(uid, m):
+    rows, err = psql(
+        "SELECT txn_type, category, sum(amount) FROM bot_transactions WHERE user_id = :'uid'::int AND to_char(occurred_at, 'YYYY-MM') = :'mth' GROUP BY 1, 2 ORDER BY 3 DESC;",
+        {'uid': str(int(uid)), 'mth': m})
+    if err:
+        out({'ok': False, 'error': 'db_error', 'detail': err[:300]})
+    by_cat, total_exp, total_inc = [], 0.0, 0.0
+    for line in rows.strip().splitlines():
+        if not line.strip():
+            continue
+        tp, cat, s = line.split(chr(1))
+        v = float(s)
+        if tp == 'expense':
+            total_exp += v
+        else:
+            total_inc += v
+        by_cat.append({'type': tp, 'category': cat, 'amount': round(v, 2)})
+    return {'total_expense': round(total_exp, 2), 'total_income': round(total_inc, 2), 'by_category': by_cat}
+
+def _prev_month(m):
+    y, mo = int(m[:4]), int(m[5:7])
+    return ('%d-%02d' % (y - 1, 12)) if mo == 1 else ('%d-%02d' % (y, mo - 1))
+
+def cmd_undo(user_id):
+    rows, err = psql(
+        "DELETE FROM bot_transactions WHERE id = (SELECT id FROM bot_transactions WHERE user_id = :'uid'::int ORDER BY id DESC LIMIT 1) RETURNING id, txn_type, amount, category, COALESCE(note,'');",
+        {'uid': str(int(user_id))})
+    if err:
+        out({'ok': False, 'error': 'db_error', 'detail': err[:300]})
+    if not rows.strip():
+        out({'ok': False, 'error': 'no_records'})
+    i, tp, amt, cat, note = rows.strip().split(chr(1))
+    out({'ok': True, 'deleted': {'id': int(i), 'type': tp, 'amount': float(amt), 'category': cat, 'note': note}})
+
+def cmd_compare(user_id, month=None):
+    m = month or datetime.date.today().strftime('%Y-%m')
+    if not re.match(r'^\d{4}-\d{2}$', m):
+        out({'ok': False, 'error': 'bad_month'})
+    cur = _month_totals(user_id, m)
+    pm = _prev_month(m)
+    prev = _month_totals(user_id, pm)
+    out({'ok': True, 'month': m, 'prev_month': pm,
+         'this': cur, 'prev': prev,
+         'expense_diff': round(cur['total_expense'] - prev['total_expense'], 2),
+         'income_diff': round(cur['total_income'] - prev['total_income'], 2)})
+
+def cmd_week(user_id, d=None):
+    if d:
+        try:
+            base = datetime.date.fromisoformat(d)
+        except ValueError:
+            out({'ok': False, 'error': 'bad_date'})
+    else:
+        base = datetime.date.today() - datetime.timedelta(days=7)
+    monday = base - datetime.timedelta(days=base.weekday())
+    start = monday.strftime('%Y-%m-%d 00:00:00')
+    end = (monday + datetime.timedelta(days=7)).strftime('%Y-%m-%d 00:00:00')
+    rows, err = psql(
+        "SELECT txn_type, category, sum(amount) FROM bot_transactions WHERE user_id = :'uid'::int AND occurred_at >= :'s'::timestamptz AND occurred_at < :'e'::timestamptz GROUP BY 1, 2 ORDER BY 3 DESC;",
+        {'uid': str(int(user_id)), 's': start, 'e': end})
+    if err:
+        out({'ok': False, 'error': 'db_error', 'detail': err[:300]})
+    by_cat, total_exp, total_inc = [], 0.0, 0.0
+    for line in rows.strip().splitlines():
+        if not line.strip():
+            continue
+        tp, cat, s = line.split(chr(1))
+        v = float(s)
+        if tp == 'expense':
+            total_exp += v
+        else:
+            total_inc += v
+        by_cat.append({'type': tp, 'category': cat, 'amount': round(v, 2)})
+    out({'ok': True, 'week': monday.strftime('%Y-%m-%d') + '~' + (monday + datetime.timedelta(days=6)).strftime('%Y-%m-%d'),
+         'total_expense': round(total_exp, 2), 'total_income': round(total_inc, 2), 'by_category': by_cat})
+
+def cmd_users():
+    rows, err = psql(
+        "SELECT id, wx_id, COALESCE(display_name,'') FROM bot_users ORDER BY id;", None)
+    if err:
+        out({'ok': False, 'error': 'db_error', 'detail': err[:300]})
+    users = []
+    for line in rows.strip().splitlines():
+        if not line.strip():
+            continue
+        i, w, n = line.split(chr(1))
+        users.append({'id': int(i), 'wx_id': w, 'name': n})
+    out({'ok': True, 'users': users})
+
 USAGE = '''用法: acct.py <command> [args]
   ensure-user <wx_id> [display_name]
   add <user_id> <expense|income> <amount> <category> [note]
   month <user_id> [YYYY-MM]
+  compare <user_id> [YYYY-MM]     当月与上月对比
+  week <user_id> [YYYY-MM-DD]     周汇总（默认上一个自然周，周一~周日）
   recent <user_id> [n]
+  undo <user_id>                  撤销最近一笔
   delete <user_id> <id>
+  users                           列出所有用户
 输出: 单行 JSON'''
 
 def main():
@@ -148,10 +241,18 @@ def main():
             cmd_add(args[0], args[1], args[2], args[3], args[4] if len(args) == 5 else None)
         elif cmd == 'month' and len(args) in (1, 2):
             cmd_month(args[0], args[1] if len(args) == 2 else None)
+        elif cmd == 'compare' and len(args) in (1, 2):
+            cmd_compare(args[0], args[1] if len(args) == 2 else None)
+        elif cmd == 'week' and len(args) in (1, 2):
+            cmd_week(args[0], args[1] if len(args) == 2 else None)
         elif cmd == 'recent' and len(args) in (1, 2):
             cmd_recent(args[0], args[1])
+        elif cmd == 'undo' and len(args) == 1:
+            cmd_undo(args[0])
         elif cmd == 'delete' and len(args) == 2:
             cmd_delete(args[0], args[1])
+        elif cmd == 'users' and len(args) == 0:
+            cmd_users()
         else:
             print(USAGE); sys.exit(1)
     except ValueError:
