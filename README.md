@@ -1,150 +1,63 @@
-# 记账Agent
+# WeChat Accounting Bot (OpenClaw)
 
-智能AI记账助手 - 基于LangChain的个人财务管理应用
+微信聊天记账机器人，基于 OpenClaw 框架 + 微信官方 ClawBot（iLink）通道 + DeepSeek 大模型解析 + PostgreSQL 存储。
 
-## ✨ 功能特性
+原 FastAPI 全栈记账应用已下线（代码见 git 历史），当前仓库只维护 OpenClaw 记账机器人。
 
-- 🤖 **AI对话记账** - 用自然语言记录收支，如"今天午餐花了35元"
-- 📊 **智能分类** - 自动识别并分类交易
-- 📈 **消费分析** - 按时间、分类统计消费情况
-- ⚠️ **预算提醒** - 超支自动预警
-- 💡 **财务建议** - 基于消费模式的个性化建议
-- 📱 **响应式Web** - 支持桌面和移动端访问
+## 仓库结构
 
-## 🛠️ 技术栈
+```
+openclaw-bot/
+├── acct.py                          # 数据层 CLI（部署于服务器 /opt/openclaw-accounting/acct.py）
+└── skills/
+    └── wechat-accounting/
+        └── SKILL.md                 # OpenClaw 记账技能（部署于 ~/.openclaw/workspace/skills/）
+```
 
-| 层级 | 技术 |
+## 功能
+
+- 记支出 / 记收入（自然语言，如「午餐 28 元」「发工资 5000」）
+- 月度汇总（含各分类小计，支持查历史月份）
+- 最近记录查询
+- 删除记错的账
+- 首次发消息自动建号（多用户隔离，按微信 ID）
+
+## 部署位置（服务器 101.200.232.229）
+
+| 组件 | 路径 |
 |------|------|
-| **前端** | Vue 3 + TypeScript + Element Plus + ECharts |
-| **后端** | FastAPI + SQLAlchemy + Alembic |
-| **数据库** | PostgreSQL |
-| **AI框架** | LangChain + DeepSeek |
-| **部署** | Docker + Nginx |
+| 数据层脚本 | `/opt/openclaw-accounting/acct.py` |
+| 记账技能 | `/root/.openclaw/workspace/skills/wechat-accounting/SKILL.md` |
+| OpenClaw 网关 | systemd 服务 `openclaw-gateway`，配置 `/root/.openclaw/openclaw.json` |
+| 登录重启脚本 | `/root/.openclaw/restart-login.sh`（微信二维码过期时重新生成） |
 
-## 🚀 快速开始
+## 数据表
 
-### 方式一：Docker部署（推荐）
+存于 PostgreSQL 库 `accounting_agent`：
 
-1. 克隆项目
-```bash
-git clone https://github.com/SmallTiger3/accounting-agent.git
-cd accounting-agent
-```
+- `bot_users` — 微信用户（wx_id 唯一）
+- `bot_transactions` — 收支记录（类型/金额/分类/备注/时间）
 
-2. 配置环境变量
-```bash
-cp .env.example .env
-# 编辑 .env 文件，填入你的配置
-```
+> 注意：库中另有旧 Web 应用遗留的表（users/transactions 等），已停用但未删除。
 
-3. 启动服务
-```bash
-docker-compose up -d
-```
-
-4. 访问应用
-- 前端：http://localhost
-- API文档：http://localhost:8000/docs
-
-### 方式二：本地开发
-
-#### 后端
+## 运维速查
 
 ```bash
-cd backend
+# 网关状态
+systemctl status openclaw-gateway
+openclaw channels status --probe
 
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# 或
-venv\Scripts\activate  # Windows
+# 微信二维码过期后重新生成
+bash /root/.openclaw/restart-login.sh
 
-# 安装依赖
-pip install -r requirements.txt
-
-# 配置环境变量
-cp .env.example .env
-# 编辑 .env 文件
-
-# 启动服务
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# 数据层命令
+python3 /opt/openclaw-accounting/acct.py ensure-user <wx_id>
+python3 /opt/openclaw-accounting/acct.py add <user_id> expense 28.5 餐饮 午餐
+python3 /opt/openclaw-accounting/acct.py month <user_id>
+python3 /opt/openclaw-accounting/acct.py recent <user_id> 10
+python3 /opt/openclaw-accounting/acct.py delete <user_id> <id>
 ```
 
-#### 前端
+## 修改发布流程
 
-```bash
-cd frontend
-
-# 安装依赖
-npm install
-
-# 启动开发服务器
-npm run dev
-```
-
-## 📁 项目结构
-
-```
-accounting-agent/
-├── backend/                    # 后端服务
-│   ├── app/
-│   │   ├── api/               # API路由
-│   │   │   └── endpoints/     # 各模块端点
-│   │   ├── agent/             # LangChain Agent
-│   │   │   ├── tools/         # Agent工具
-│   │   │   ├── accounting_agent.py
-│   │   │   └── llm_factory.py
-│   │   ├── core/              # 核心配置
-│   │   ├── db/                # 数据库连接
-│   │   ├── models/            # 数据模型
-│   │   ├── schemas/           # Pydantic模式
-│   │   └── main.py            # 应用入口
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/                   # 前端应用
-│   ├── src/
-│   │   ├── api/               # API调用
-│   │   ├── components/        # 组件
-│   │   ├── layouts/           # 布局
-│   │   ├── router/            # 路由
-│   │   ├── stores/            # 状态管理
-│   │   └── views/             # 页面
-│   ├── package.json
-│   └── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
-## 🔧 配置说明
-
-### 环境变量
-
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| `DATABASE_URL` | PostgreSQL连接字符串 | - |
-| `SECRET_KEY` | JWT密钥 | - |
-| `LLM_PROVIDER` | LLM提供商 | `deepseek` |
-| `DEEPSEEK_API_KEY` | DeepSeek API密钥 | - |
-| `DEEPSEEK_BASE_URL` | DeepSeek API地址 | `https://api.deepseek.com` |
-| `LLM_MODEL` | 模型名称 | `deepseek-chat` |
-| `LLM_TEMPERATURE` | 生成温度 | `0.7` |
-
-### 支持的LLM
-
-- **DeepSeek** - 推荐，性价比高
-- **OpenAI GPT-4o** - 效果最好，价格较贵
-- **MiMo** - 小米自研模型（需配置API地址）
-
-## 📖 API文档
-
-启动后端服务后，访问：
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
-## 🤝 贡献
-
-欢迎提交Issue和Pull Request！
-
-## 📄 许可证
-
-MIT License
+改 `acct.py` 或 `SKILL.md` 后：提交推送本仓库，并同步覆盖服务器上对应文件，然后无需重启网关（技能文件即时生效；acct.py 无状态）。
